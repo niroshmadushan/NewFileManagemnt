@@ -50,7 +50,7 @@ const AdminSidebar = ({ onNavigate }) => {
         // Define navigation items and their corresponding permission keys
         const navItems = [
           { text: 'Dashboard', icon: <DashboardIcon />, action: 'dashboard', permissionKey: null },
-          { text: 'Analytics', icon: <AnalyticsIcon />, action: 'analytics', permissionKey: null },
+          { text: 'File MGT', icon: <AnalyticsIcon />, action: 'file', permissionKey: null },
           { text: 'Place MGT', icon: <PlaceIcon />, action: 'place', permissionKey: null },
           { text: 'User MGT', icon: <PeopleIcon />, action: 'usermgt', permissionKey: null },
           { text: 'Invitations', icon: <EmailIcon />, action: 'invitation', permissionKey: null },

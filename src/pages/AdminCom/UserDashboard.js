@@ -314,15 +314,8 @@ const UserDashboard = () => {
 
         {/* Content Rendering */}
         {currentPage === 'dashboard' && <Userbrd />}
-        {currentPage === 'ChangePassword' && <ChangePassword />}
-        {currentPage === 'place' && <PlaceManagement />}
-        {currentPage === 'usermgt' && <AdminUserManagement />}
-        {currentPage === 'invitation' && <Invitation />}
-        {currentPage === 'teamsld' && <TeamLeaderManagement />}
-        {currentPage === 'visitor' && <VisitorManagement />}
-        {currentPage === 'availble' && <PlaceAvailability />}
-        {currentPage === 'admit' && <VisitorAdmit />}
-        {currentPage === 'analytics' && <Analytics />}
+        {currentPage === 'dashboard' && <Userbrd />}
+       
       </div>
     </div>
   );
