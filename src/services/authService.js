@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { logout, getUserDetails } from './userService';
 
-const BASE_URL = 'https://backendversion001-bxg0dearfxeabdcb.eastus-01.azurewebsites.net/api';
+const BASE_URL = 'http://192.168.1.20:3000/api';
 
 // Helper function to get and set the new tokens in headers
 const setAuthHeaders = () => {

@@ -9,14 +9,8 @@ import { toast, Toaster } from 'react-hot-toast';
 import { updateApiKey, getUserDetails, logout } from '../../services/userService'; // Import logout function
 import { selectData } from '../../services/dataService';
 import WarningIcon from '@mui/icons-material/Warning';
-import TeamLeaderManagement from './TeamLeaderManagement';
-import PlaceManagement from './PlaceManagement';
-import AdminUserManagement from './AdminUserManagement';
-import Invitation from './Invitation';
-import VisitorManagement from './VisitorManagement';
-import PlaceAvailability from './PlaceAvailability';
-import VisitorAdmit from './VisitorAdmit';
-import Analytics from './Analytics';
+import Filemgt from './Filemgt';
+
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
   return (
@@ -314,7 +308,7 @@ const UserDashboard = () => {
 
         {/* Content Rendering */}
         {currentPage === 'dashboard' && <Userbrd />}
-        {currentPage === 'dashboard' && <Userbrd />}
+        {currentPage === 'file' && <Filemgt />}
        
       </div>
     </div>

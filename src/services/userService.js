@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://backendversion001-bxg0dearfxeabdcb.eastus-01.azurewebsites.net/api';
+const BASE_URL = 'http://192.168.1.20:3000/api';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
