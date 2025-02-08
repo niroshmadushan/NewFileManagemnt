@@ -21,6 +21,7 @@ import { Folder, Add, InsertDriveFile, Close, Edit, PictureAsPdf, Article, Folde
 import { selectData, insertData, updateData } from '../../services/dataService';
 import { toast } from 'react-hot-toast';
 import { uploadFile, downloadFile } from '../../services/fileservice';
+import { getUserDetails } from '../../services/userService'; // Assuming you have a function to get user details
 
 const FileExplorer = () => {
   const theme = useTheme();
@@ -44,7 +45,8 @@ const FileExplorer = () => {
   useEffect(() => {
     const fetchMainFolders = async () => {
       try {
-        const response = await selectData('main_folders');
+        const userDetails = await getUserDetails();
+        const response = await selectData('main_folders', { userid: userDetails.id });
         setMainFolders(response.data);
       } catch (error) {
         console.error('Failed to fetch main folders:', error);
@@ -59,11 +61,17 @@ const FileExplorer = () => {
       setMainFolderError(true);
       toast.error('Please enter a name for the main folder');
     } else {
+      const userDetails = await getUserDetails();
+      const folderExists = mainFolders.some(folder => folder.name.toLowerCase() === newMainFolderName.toLowerCase());
+      if (folderExists) {
+        toast.error('A folder with this name already exists');
+        return;
+      }
       try {
-        await insertData('main_folders', { name: newMainFolderName });
+        await insertData('main_folders', { name: newMainFolderName, userid: userDetails.id });
         setNewMainFolderName('');
         setMainFolderError(false);
-        const response = await selectData('main_folders');
+        const response = await selectData('main_folders', { userid: userDetails.id });
         setMainFolders(response.data);
         toast.success('Main folder created successfully');
       } catch (error) {
@@ -72,14 +80,28 @@ const FileExplorer = () => {
       }
     }
   };
-
+  const handleSelectMainFolder = async (mainFolder) => {
+    setSelectedMainFolder(mainFolder);
+    try {
+      const response = await selectData('sub_folders', { main_folder_id: mainFolder.id });
+      setSubFolders(response.data);
+    } catch (error) {
+      console.error('Failed to fetch sub folders:', error);
+    }
+  };
   const handleRenameMainFolder = async (folderId, newName) => {
     if (newName.trim() === '') {
       toast.error('Please enter a name for the main folder');
     } else {
+      const folderExists = mainFolders.some(folder => folder.name.toLowerCase() === newName.toLowerCase() && folder.id !== folderId);
+      if (folderExists) {
+        toast.error('A folder with this name already exists');
+        return;
+      }
       try {
         await updateData('main_folders', { name: newName }, { id: folderId });
-        const response = await selectData('main_folders');
+        const userDetails = await getUserDetails();
+        const response = await selectData('main_folders', { userid: userDetails.id });
         setMainFolders(response.data);
         setRenameMainFolderId(null);
         toast.success('Main folder renamed successfully');
@@ -90,21 +112,16 @@ const FileExplorer = () => {
     }
   };
 
-  const handleSelectMainFolder = async (mainFolder) => {
-    setSelectedMainFolder(mainFolder);
-    try {
-      const response = await selectData('sub_folders', { main_folder_id: mainFolder.id });
-      setSubFolders(response.data);
-    } catch (error) {
-      console.error('Failed to fetch sub folders:', error);
-    }
-  };
-
   const handleCreateSubFolder = async () => {
     if (newSubFolderName.trim() === '') {
       setSubFolderError(true);
       toast.error('Please enter a name for the sub folder');
     } else {
+      const folderExists = subFolders.some(folder => folder.name.toLowerCase() === newSubFolderName.toLowerCase());
+      if (folderExists) {
+        toast.error('A folder with this name already exists');
+        return;
+      }
       try {
         await insertData('sub_folders', { main_folder_id: selectedMainFolder.id, name: newSubFolderName });
         setNewSubFolderName('');
@@ -123,6 +140,11 @@ const FileExplorer = () => {
     if (newName.trim() === '') {
       toast.error('Please enter a name for the sub folder');
     } else {
+      const folderExists = subFolders.some(folder => folder.name.toLowerCase() === newName.toLowerCase() && folder.id !== folderId);
+      if (folderExists) {
+        toast.error('A folder with this name already exists');
+        return;
+      }
       try {
         await updateData('sub_folders', { name: newName }, { id: folderId });
         const response = await selectData('sub_folders', { main_folder_id: selectedMainFolder.id });
@@ -135,6 +157,7 @@ const FileExplorer = () => {
       }
     }
   };
+
 
   const handleSelectSubFolder = async (subFolder) => {
     setSelectedSubFolder(subFolder);
@@ -151,7 +174,8 @@ const FileExplorer = () => {
     const file = event.target.files[0];
     if (file && selectedSubFolder) {
       try {
-        await uploadFile(file, localStorage.getItem('userId'), selectedSubFolder.id);
+        const userDetails = await getUserDetails();
+        await uploadFile(file,userDetails.id , selectedSubFolder.id);
         toast.success('File uploaded successfully');
         const response = await selectData('files', { folder_id: selectedSubFolder.id });
         setFiles(response.data);
@@ -199,22 +223,22 @@ const FileExplorer = () => {
   };
 
   const getFileViewUrl = (relativePath) => {
-    return `http://192.168.1.20:3000/${relativePath}`;
+    return `http://192.168.12.50:3000/${relativePath}`;
   };
 
-  const filteredMainFolders = mainFolders.filter(folder => 
+  const filteredMainFolders = mainFolders.filter(folder =>
     folder.name.toLowerCase().includes(mainFolderSearchTerm.toLowerCase())
   );
 
-  const filteredSubFolders = subFolders.filter(folder => 
+  const filteredSubFolders = subFolders.filter(folder =>
     folder.name.toLowerCase().includes(subFolderSearchTerm.toLowerCase())
   );
 
   return (
-    <Box sx={{ 
-      padding: 2, 
-      width: '100%', 
-      height: 'calc(100vh - 75px)', 
+    <Box sx={{
+      padding: 2,
+      width: '100%',
+      height: 'calc(100vh - 75px)',
       backgroundColor: theme.palette.background.default,
       display: 'flex',
       flexDirection: 'column'
@@ -223,18 +247,18 @@ const FileExplorer = () => {
         <Folder sx={{ fontSize: 32, color: 'primary.main' }} />
         File Explorer
       </Typography>
-      
+
       <Grid container spacing={2} sx={{ flex: 1, overflow: 'hidden' }}>
         {/* Main Folders Section */}
-        <Grid item xs={2} sx={{ 
-          borderRight: '1px solid #ccc', 
+        <Grid item xs={2} sx={{
+          borderRight: '1px solid #ccc',
           height: '90%',
           display: 'flex',
           flexDirection: 'column',
-          p:1,
+          p: 1,
           overflow: 'hidden'
         }}>
-          <Typography variant="h6" sx={{ color: theme.palette.text.primary,mb:1 }}>Main Folders</Typography>
+          <Typography variant="h6" sx={{ color: theme.palette.text.primary, mb: 1 }}>Main Folders</Typography>
           <TextField
             label="Search Main Folders"
             value={mainFolderSearchTerm}
@@ -273,14 +297,14 @@ const FileExplorer = () => {
               ),
             }}
           />
-          <Box sx={{ 
+          <Box sx={{
             padding: 2,
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             overflowY: 'auto',
             '&::-webkit-scrollbar': { width: '6px' },
-            '&::-webkit-scrollbar-thumb': { 
+            '&::-webkit-scrollbar-thumb': {
               backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
               borderRadius: '3px'
             }
@@ -321,25 +345,25 @@ const FileExplorer = () => {
         {/* Sub Folders Section */}
         <Grid item xs={10} sx={{ height: '100%', overflow: 'hidden' }}>
           {selectedMainFolder && (
-            <Box sx={{ 
-              padding: 2, 
+            <Box sx={{
+              padding: 2,
               width: '100%',
               height: '100%',
               display: 'flex',
               flexDirection: 'column'
             }}>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: 3 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 3
               }}>
-                <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>Sub Folders</Typography>
+
                 <TextField
                   label="Search Sub Folders"
                   value={subFolderSearchTerm}
                   onChange={(e) => setSubFolderSearchTerm(e.target.value)}
-                  sx={{ width: 200, marginRight: 2 }}
+                  sx={{ width: 400, marginRight: 2 }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -348,6 +372,10 @@ const FileExplorer = () => {
                     ),
                   }}
                 />
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2, color: theme.palette.text.primary }}>
+                  <Article sx={{ fontSize: 20, color: 'primary.main' }} />
+                  Sub Directory
+                </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <TextField
                     label="New Sub Folder Name"
@@ -374,13 +402,13 @@ const FileExplorer = () => {
                   </Button>
                 </Box>
               </Box>
-              
-              <Grid container spacing={2} sx={{ 
+
+              <Grid container spacing={2} sx={{
                 flex: 1,
-                p:1,
+                p: 1,
                 overflowY: 'auto',
                 '&::-webkit-scrollbar': { width: '6px' },
-                '&::-webkit-scrollbar-thumb': { 
+                '&::-webkit-scrollbar-thumb': {
                   backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
                   borderRadius: '3px'
                 },
@@ -389,13 +417,13 @@ const FileExplorer = () => {
               }}>
                 {filteredSubFolders.map((subFolder) => (
                   <Grid item key={subFolder.id} xs={2}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      padding: 2, 
-                      border: '1px solid #ccc', 
-                      borderRadius: 2, 
+                    <Box sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: 2,
+                      border: '1px solid #ccc',
+                      borderRadius: 2,
                       position: 'relative',
                       height: 120
                     }}>
