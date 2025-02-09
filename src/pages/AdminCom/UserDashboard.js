@@ -10,6 +10,7 @@ import { updateApiKey, getUserDetails, logout } from '../../services/userService
 import { selectData } from '../../services/dataService';
 import WarningIcon from '@mui/icons-material/Warning';
 import Filemgt from './Filemgt';
+import DocumentTracker from './DocumentTracker';
 
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
@@ -309,6 +310,7 @@ const UserDashboard = () => {
         {/* Content Rendering */}
         {currentPage === 'dashboard' && <Userbrd />}
         {currentPage === 'file' && <Filemgt />}
+        {currentPage === 'doctrack' && <DocumentTracker />}
        
       </div>
     </div>
