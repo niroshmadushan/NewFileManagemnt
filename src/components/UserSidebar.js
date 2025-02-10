@@ -53,6 +53,7 @@ const AdminSidebar = ({ onNavigate }) => {
           { text: 'File MGT', icon: <AnalyticsIcon />, action: 'file', permissionKey: null },
           { text: 'Doc Track', icon: <AnalyticsIcon />, action: 'doctrack', permissionKey: null },
           { text: 'Course add', icon: <AnalyticsIcon />, action: 'courseadd', permissionKey: null },
+          { text: 'Course CNT', icon: <AnalyticsIcon />, action: 'coursecnt', permissionKey: null },
           { text: 'Place MGT', icon: <PlaceIcon />, action: 'place', permissionKey: null },
           { text: 'User MGT', icon: <PeopleIcon />, action: 'usermgt', permissionKey: null },
           { text: 'Invitations', icon: <EmailIcon />, action: 'invitation', permissionKey: null },
