@@ -1,147 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
-import { Box, Typography, Button, Grid, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import { Event, Search, Add, Schedule, Person, History, Visibility, Edit } from '@mui/icons-material';
-import { getUserDetails, selectDataProfiles } from '../../services/userService';
-import { selectData, insertData, updateData } from '../../services/dataService';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect, useContext } from "react";
+import {
+    Box,
+    Typography,
+    Button,
+    Grid,
+    TextField,
+    InputAdornment,
+    Tabs,
+    Tab,
+    MenuItem,
+} from "@mui/material";
+import { Search, Add } from "@mui/icons-material";
+import { toast } from "react-hot-toast";
+import { selectData } from "../../services/dataService";
+import { getUserDetails } from "../../services/userService";
+import { ThemeContext } from "../../context/ThemeContext";
+import CourseCard from "../../components/CourseCard";
+import AddEditCourseDialog from "../../components/AddEditCourseDialog";
+import AssignUserDialog from "../../components/AssignUserDialog";
 
-const CourseCreationPage = () => {
+const CourseManagement = () => {
+    const { darkMode } = useContext(ThemeContext);
     const [courses, setCourses] = useState([]);
-    const [teachers, setTeachers] = useState([]);
-    const [students, setStudents] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [selectedStatus, setSelectedStatus] = useState('all');
-    const [openCourseDialog, setOpenCourseDialog] = useState(false);
-    const [openTeacherDialog, setOpenTeacherDialog] = useState(false);
-    const [openStudentDialog, setOpenStudentDialog] = useState(false);
-    const [formData, setFormData] = useState({
-        id: null,
-        name: '',
-        description: '',
-        year: '',
-        expiration_date: '',
-        is_active: true,
-        is_private: false,
-        pin: '',
-    });
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterYear, setFilterYear] = useState("");
+    const [activeTab, setActiveTab] = useState(0);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [openAssignDialog, setOpenAssignDialog] = useState(false);
+    const [assignRole, setAssignRole] = useState(""); // "teacher" or "student"
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [companyId, setCompanyId] = useState(null);
-    const { darkMode } = useContext(ThemeContext);
+    const [uniqueYears, setUniqueYears] = useState([]); // Stores available years for filtering
 
-    // Fetch company ID
+    // Fetch company ID & courses
     useEffect(() => {
         const fetchCompanyId = async () => {
             try {
                 const userDetails = await getUserDetails();
-                setCompanyId(userDetails.company_id);
+                if (userDetails?.company_id) {
+                    setCompanyId(userDetails.company_id);
+                    refreshCourses(userDetails.company_id);
+                } else {
+                    toast.error("Company ID not found.");
+                }
             } catch (error) {
-                console.error('Failed to fetch user details:', error);
-                toast.error('Failed to fetch user details. Please check the console for details.');
+                console.error("Error fetching user details:", error);
+                toast.error("Failed to fetch user details.");
             }
         };
         fetchCompanyId();
     }, []);
 
-    // Fetch teachers and students
-    useEffect(() => {
-        const fetchUsers = async () => {
-            if (companyId) {
-                try {
-                    const teachersResponse = await selectDataProfiles({ company_id: companyId, role: 'teacher' });
-                    const studentsResponse = await selectDataProfiles({ company_id: companyId, role: 'student' });
-                    setTeachers(teachersResponse.data);
-                    setStudents(studentsResponse.data);
-                } catch (error) {
-                    console.error('Failed to fetch users:', error);
-                    toast.error('Failed to fetch users. Please check the console for details.');
-                }
-            }
-        };
-        fetchUsers();
-    }, [companyId]);
-
-    // Fetch courses
-    useEffect(() => {
-        const fetchCourses = async () => {
-            if (companyId) {
-                try {
-                    const response = await selectData('courses', { company_id: companyId });
-                    setCourses(response.data);
-                } catch (error) {
-                    console.error('Failed to fetch courses:', error);
-                    toast.error('Failed to fetch courses. Please check the console for details.');
-                }
-            }
-        };
-        fetchCourses();
-    }, [companyId]);
-
-    // Handle course form submission
-    const handleSubmitCourse = async (e) => {
-        e.preventDefault();
+    // Fetch courses and extract unique years
+    const refreshCourses = async (companyId) => {
+        if (!companyId) return;
         try {
-            if (formData.id) {
-                await updateData('courses', formData, { id: formData.id });
-                toast.success('Course updated successfully!');
-            } else {
-                await insertData('courses', { ...formData, company_id: companyId });
-                toast.success('Course created successfully!');
-            }
-            setOpenCourseDialog(false);
-            // Refresh courses list
-            const response = await selectData('courses', { company_id: companyId });
-            setCourses(response.data);
+            const response = await selectData("courses", { company_id: companyId });
+            const coursesData = response?.data || [];
+
+            setCourses(coursesData);
+
+            // Extract unique years for filtering
+            const years = [...new Set(coursesData.map(course => course.year))].sort();
+            setUniqueYears(years);
         } catch (error) {
-            console.error('Failed to save course:', error);
-            toast.error('Failed to save course. Please check the console for details.');
+            console.error("Error fetching courses:", error);
+            toast.error("Failed to fetch courses.");
         }
     };
 
-    // Handle teacher addition
-    const handleAddTeacher = async (teacherId) => {
-        try {
-            await insertData('teacher_course', { course_id: selectedCourse.id, user_id: teacherId });
-            toast.success('Teacher added to course successfully!');
-            // Refresh teachers list
-            const response = await selectData('teacher_course', { course_id: selectedCourse.id });
-            setTeachers(response.data);
-        } catch (error) {
-            console.error('Failed to add teacher:', error);
-            toast.error('Failed to add teacher. Please check the console for details.');
-        }
-    };
-
-    // Handle student addition
-    const handleAddStudent = async (studentId) => {
-        try {
-            await insertData('student_course', { course_id: selectedCourse.id, user_id: studentId });
-            toast.success('Student added to course successfully!');
-            // Refresh students list
-            const response = await selectData('student_course', { course_id: selectedCourse.id });
-            setStudents(response.data);
-        } catch (error) {
-            console.error('Failed to add student:', error);
-            toast.error('Failed to add student. Please check the console for details.');
-        }
-    };
+    // Handle Search & Filtering
+    const filteredCourses = courses.filter((course) => {
+        const matchesSearch = course.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesYear = filterYear ? course.year === filterYear : true;
+        const matchesStatus = activeTab === 0 ? course.is_active : !course.is_active;
+        return matchesSearch && matchesYear && matchesStatus;
+    });
 
     return (
-        <Box sx={{ padding: 2 }}>
-            {/* Page Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Event sx={{ fontSize: 32, color: 'primary.main' }} />
-                    Course Management
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ p: 3 }}>
+            {/* Header */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+                <Typography variant="h4">📚 Course Management</Typography>
+                <Box sx={{ display: "flex", gap: 2 }}>
                     <TextField
-                        label="Search Courses"
-                        variant="outlined"
+                        label="Search Course"
                         size="small"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -149,454 +95,96 @@ const CourseCreationPage = () => {
                                 </InputAdornment>
                             ),
                         }}
-                        sx={{ width: '300px' }}
                     />
+                    {/* Year Filter */}
+                    <TextField
+                        select
+                        label="Filter by Year"
+                        size="small"
+                        value={filterYear}
+                        onChange={(e) => setFilterYear(e.target.value)}
+                        sx={{ width: 150 }}
+                    >
+                        <MenuItem value="">All Years</MenuItem>
+                        {uniqueYears.map((year) => (
+                            <MenuItem key={year} value={year}>
+                                {year}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+                        <Tab label="Active" />
+                        <Tab label="Inactive" />
+                    </Tabs>
                     <Button
                         variant="contained"
                         startIcon={<Add />}
                         onClick={() => {
-                            setFormData({ id: null, name: '', description: '', year: '', expiration_date: '', is_active: true, is_private: false, pin: '' });
-                            setOpenCourseDialog(true);
+                            setSelectedCourse(null);
+                            setOpenDialog(true);
                         }}
-                        sx={{ borderRadius: '20px', textTransform: 'none', padding: '10px 20px' }}
                     >
-                        Create New Course
+                        Add Course
                     </Button>
                 </Box>
             </Box>
 
-            {/* Course Cards */}
-            <Box
-                sx={{
-                    p: 2,
-                    maxHeight: 'calc(100vh - 200px)',
-                    overflowY: 'auto',
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: darkMode ? '#424242' : '#f1f1f1',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: darkMode ? '#757575' : '#888',
-                        borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: darkMode ? '#999' : '#555',
-                    },
-                }}
-            >
-                <Grid container spacing={3}>
-                    {courses.map((course) => (
-                        <Grid item xs={12} sm={6} md={4} key={course.id}>
-                            <Box
-                                sx={{
-                                    border: '1px solid',
-                                    borderColor: darkMode ? '#666' : '#ddd',
-                                    borderRadius: 2,
-                                    padding: 2,
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <Typography variant="h6">{course.name}</Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {course.description}
-                                </Typography>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        onClick={() => {
-                                            setSelectedCourse(course);
-                                            setFormData(course);
-                                            setOpenCourseDialog(true);
-                                        }}
-                                        sx={{ color: 'primary.main', '&:hover': { backgroundColor: 'primary.main', color: 'white' } }}
-                                    >
-                                        <Edit /> Edit
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        onClick={() => {
-                                            setSelectedCourse(course);
-                                            // Open view dialog
-                                        }}
-                                        sx={{ color: 'primary.main', '&:hover': { backgroundColor: 'primary.main', color: 'white' } }}
-                                    >
-                                        <Visibility /> View
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    ))}
+            {/* Course List */}
+            <Box sx={{
+                maxHeight: "70vh",
+                overflowY: "auto",
+                p:2,
+                "&::-webkit-scrollbar": { width: "8px" },
+                "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: darkMode ? "#757575" : "#888",
+                    borderRadius: "4px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: darkMode ? "#999" : "#555",
+                },
+            }}>
+                <Grid container spacing={2}>
+                    {filteredCourses.length > 0 ? (
+                        filteredCourses.map((course) => (
+                            <Grid item xs={12} sm={6} md={4} key={course.id}>
+                                <CourseCard
+                                    course={course}
+                                    setSelectedCourse={setSelectedCourse}
+                                    setOpenDialog={setOpenDialog}
+                                    refreshCourses={() => refreshCourses(companyId)}
+                                    setAssignRole={setAssignRole} // ✅ Enables role selection
+                                    setOpenAssignDialog={setOpenAssignDialog} // ✅ Opens the assign dialog
+                                />
+                            </Grid>
+                        ))
+                    ) : (
+                        <Typography variant="h6" sx={{ textAlign: "center", width: "100%", mt: 3, color: "gray" }}>
+                            No courses found.
+                        </Typography>
+                    )}
                 </Grid>
             </Box>
 
-            {/* Course Dialog */}
-            <Dialog open={openCourseDialog} onClose={() => setOpenCourseDialog(false)} maxWidth="md" fullWidth>
-                <DialogTitle>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Event sx={{ color: 'primary.main' }} />
-                        {formData.id ? 'Edit Course' : 'Create New Course'}
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <TextField
-                                label="Course Name"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                fullWidth
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                label="Description"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                fullWidth
-                                multiline
-                                rows={4}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Year"
-                                value={formData.year}
-                                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                                fullWidth
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Expiration Date"
-                                type="date"
-                                value={formData.expiration_date}
-                                onChange={(e) => setFormData({ ...formData, expiration_date: e.target.value })}
-                                fullWidth
-                            />
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Active Status"
-                                    type="checkbox"
-                                    checked={formData.is_active}
-                                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Private Course"
-                                    type="checkbox"
-                                    checked={formData.is_private}
-                                    onChange={(e) => setFormData({ ...formData, is_private: e.target.checked })}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="PIN (6 digits)"
-                                    value={formData.pin}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (/^\d+$/.test(value) && value.length <= 6) {
-                                            setFormData({ ...formData, pin: value });
-                                        }
-                                    }}
-                                    inputProps={{ maxLength: 6 }}
-                                    fullWidth
-                                    helperText={
-                                        formData.pin.length === 6
-                                            ? 'Valid PIN'
-                                            : 'Enter a 6-digit PIN'
-                                    }
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenCourseDialog(false)}>Cancel</Button>
-                        <Button
-                            onClick={handleSubmitCourse}
-                            variant="contained"
-                            color="primary"
-                        >
-                            {formData.id ? 'Update Course' : 'Create Course'}
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-    
-                {/* View Course Details Dialog */}
-                <Dialog
-                    open={selectedCourse !== null}
-                    onClose={() => setSelectedCourse(null)}
-                    maxWidth="lg"
-                    fullWidth
-                >
-                    <DialogTitle>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Event sx={{ color: 'primary.main' }} />
-                            Course Details
-                        </Box>
-                    </DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Typography variant="h6">Course Information</Typography>
-                                <Table>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell>Name:</TableCell>
-                                            <TableCell>{selectedCourse?.name}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Description:</TableCell>
-                                            <TableCell>{selectedCourse?.description}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Year:</TableCell>
-                                            <TableCell>{selectedCourse?.year}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Expiration Date:</TableCell>
-                                            <TableCell>{selectedCourse?.expiration_date}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Status:</TableCell>
-                                            <TableCell>
-                                                {selectedCourse?.is_active ? 'Active' : 'Inactive'}
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>Private:</TableCell>
-                                            <TableCell>
-                                                {selectedCourse?.is_private ? 'Yes' : 'No'}
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>PIN:</TableCell>
-                                            <TableCell>{selectedCourse?.pin}</TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </Grid>
-    
-                            <Grid item xs={12}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={() => setOpenTeacherDialog(true)}
-                                    >
-                                        Add Teacher
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={() => setOpenStudentDialog(true)}
-                                    >
-                                        Add Student
-                                    </Button>
-                                </Box>
-                            </Grid>
-    
-                            <Grid item xs={12}>
-                                <Typography variant="h6">Attached Teachers</Typography>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Status</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {teachers.map((teacher) => (
-                                            <TableRow key={teacher.id}>
-                                                <TableCell>{teacher.full_name}</TableCell>
-                                                <TableCell>{teacher.email}</TableCell>
-                                                <TableCell>
-                                                    {teacher.is_active ? 'Active' : 'Inactive'}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Grid>
-    
-                            <Grid item xs={12}>
-                                <Typography variant="h6">Attached Students</Typography>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Status</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {students.map((student) => (
-                                            <TableRow key={student.id}>
-                                                <TableCell>{student.full_name}</TableCell>
-                                                <TableCell>{student.email}</TableCell>
-                                                <TableCell>
-                                                    {student.is_active ? 'Active' : 'Inactive'}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                </Dialog>
-    
-                {/* Add Teacher Dialog */}
-                <Dialog
-                    open={openTeacherDialog}
-                    onClose={() => setOpenTeacherDialog(false)}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Person sx={{ color: 'primary.main' }} />
-                            Add Teacher to Course
-                        </Box>
-                    </DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="Search Teachers"
-                                    variant="outlined"
-                                    size="small"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <Search />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    sx={{ width: '100%' }}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {teachers
-                                            .filter((teacher) =>
-                                                teacher.full_name
-                                                    .toLowerCase()
-                                                    .includes(searchQuery)
-                                            )
-                                            .map((teacher) => (
-                                                <TableRow key={teacher.id}>
-                                                    <TableCell>{teacher.full_name}</TableCell>
-                                                    <TableCell>{teacher.email}</TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            onClick={() => handleAddTeacher(teacher.id)}
-                                                        >
-                                                            Add
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                    </TableBody>
-                                </Table>
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                </Dialog>
-    
-                {/* Add Student Dialog */}
-                <Dialog
-                    open={openStudentDialog}
-                    onClose={() => setOpenStudentDialog(false)}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Person sx={{ color: 'primary.main' }} />
-                            Add Student to Course
-                        </Box>
-                    </DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="Search Students"
-                                    variant="outlined"
-                                    size="small"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <Search />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    sx={{ width: '100%' }}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Email</TableCell>
-                                            <TableCell>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {students
-                                            .filter((student) =>
-                                                student.full_name
-                                                    .toLowerCase()
-                                                    .includes(searchQuery)
-                                            )
-                                            .map((student) => (
-                                                <TableRow key={student.id}>
-                                                    <TableCell>{student.full_name}</TableCell>
-                                                    <TableCell>{student.email}</TableCell>
-                                                    <TableCell>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            onClick={() => handleAddStudent(student.id)}
-                                                        >
-                                                            Add
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                    </TableBody>
-                                </Table>
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                </Dialog>
-            </Box>
-        );
-    };
-    
-    export default CourseCreationPage;
+            {/* Add/Edit Course Dialog */}
+            <AddEditCourseDialog
+                open={openDialog}
+                setOpen={setOpenDialog}
+                selectedCourse={selectedCourse}
+                refreshCourses={() => refreshCourses(companyId)} // ✅ Ensures real-time updates
+            />
+
+            {/* Assign Teachers/Students Dialog */}
+            {selectedCourse && (
+                <AssignUserDialog
+                    open={openAssignDialog}
+                    setOpen={setOpenAssignDialog}
+                    courseId={selectedCourse.id}
+                    role={assignRole}
+                    refreshCourses={() => refreshCourses(companyId)} // ✅ Updates course list
+                />
+            )}
+        </Box>
+    );
+};
+
+export default CourseManagement;

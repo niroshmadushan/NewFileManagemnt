@@ -11,6 +11,7 @@ import { selectData } from '../../services/dataService';
 import WarningIcon from '@mui/icons-material/Warning';
 import Filemgt from './Filemgt';
 import DocumentTracker from './DocumentTracker';
+import CourseManagement from './CourseCreation';
 
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
@@ -311,6 +312,7 @@ const UserDashboard = () => {
         {currentPage === 'dashboard' && <Userbrd />}
         {currentPage === 'file' && <Filemgt />}
         {currentPage === 'doctrack' && <DocumentTracker />}
+        {currentPage === 'courseadd' && <CourseManagement />}
        
       </div>
     </div>
