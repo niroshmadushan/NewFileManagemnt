@@ -355,7 +355,7 @@ const DocumentTracker = () => {
                         </Typography>
                       </CardContent>
                       <CardActions>
-                        <Button onClick={() => window.open('http://192.168.1.17:3000/uploads/' + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
+                        <Button onClick={() => window.open('http://172.20.10.6:3000/uploads/' + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
                       </CardActions>
                     </Card>
                   </Grid>
