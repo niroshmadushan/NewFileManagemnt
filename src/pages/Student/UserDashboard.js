@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import UserSidebar from '../../components/UserSidebar';
+import UserSidebar from '../../components/Studentsidebar';
 import ChangePassword from './ChangePassword';
 import Userbrd from './Userbrd';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -13,6 +13,7 @@ import Filemgt from './Filemgt';
 import DocumentTracker from './DocumentTracker';
 import CourseManagement from './CourseCreation';
 import CourseContentManagement from './CourseContentManagement';
+import DocumentSharingPage from './DocumentSharingPage ';
 
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
@@ -315,6 +316,7 @@ const UserDashboard = () => {
         {currentPage === 'doctrack' && <DocumentTracker />}
         {currentPage === 'courseadd' && <CourseManagement />}
         {currentPage === 'coursecnt' && <CourseContentManagement />}
+        {currentPage === 'group' && <DocumentSharingPage />}
        
       </div>
     </div>

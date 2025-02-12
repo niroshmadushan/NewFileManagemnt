@@ -24,7 +24,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import img from '../pages/AdminCom/homepic.png';
+import img from '../pages/Teacher/homepic.png';
 import { toast, Toaster } from 'react-hot-toast';
 import { getUserDetails } from '../services/userService';
 
@@ -71,8 +71,8 @@ const Login = () => {
           case 'user':
             navigate('/user');
             break;
-          case 'tablet':
-            navigate('/tablet');
+          case 'teacher':
+            navigate('/teacher');
             break;
           default:
             toast.error('Invalid role. Please contact support.', {

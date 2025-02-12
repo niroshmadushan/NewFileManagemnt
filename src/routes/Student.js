@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import UserDashboardLayout from '../pages/Teacher/UserDashboardLayout';
-import UserDashboard from '../pages/Teacher/UserDashboard';
+import UserDashboardLayout from '../pages/Student/UserDashboardLayout';
+import UserDashboard from '../pages/Student/UserDashboard';
 
 const UserRoutes = () => {
   return (

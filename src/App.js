@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import AdminRoutes from './routes/AdminRoutes';
-import Tab from './routes/Tablet';
+import Teacher from './routes/Teacher';
 import AdminCom from './routes/AdminCom';
-import TeamLeadRoutes from './routes/TeamLead';
+import Student from './routes/Student';
 import Teammeber from './routes/Teammember'; // Import the TeamMember component
 import Login from './pages/Login';
 
@@ -25,8 +25,8 @@ const App = () => {
           {/* Authenticated Routes */}
           {user?.role === 'admin' && <Route path="/admin/*" element={<AdminRoutes />} />}
           {user?.role === 'admin_com' && <Route path="/admin_com/*" element={<AdminCom />} />}
-          {user?.role === 'user' && <Route path="/user/*" element={<TeamLeadRoutes />} />}
-          {user?.role === 'tablet' && <Route path="/tablet/*" element={<Tab />} />}
+          {user?.role === 'student' && <Route path="/student/*" element={<Student />} />}
+          {user?.role === 'teacher' && <Route path="/teacher/*" element={<Teacher />} />}
 
           {/* Redirect authenticated users to their role-specific dashboard */}
           <Route
@@ -38,9 +38,9 @@ const App = () => {
                     ? '/admin'
                     : user?.role === 'admin_com'
                       ? '/admin_com'
-                      : user?.role === 'user'
-                        ? '/user'
-                        : '/tablet' // Redirect team_member users to their dashboard
+                      : user?.role === 'student'
+                        ? '/student'
+                        : '/teacher' // Redirect team_member users to their dashboard
                 }
                 replace
               />
