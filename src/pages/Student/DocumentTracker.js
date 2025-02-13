@@ -225,14 +225,7 @@ const DocumentTracker = () => {
               ),
             }}
           />
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setIsCreateTrackerPopupOpen(true)}
-            sx={{ width: '100%', marginBottom: 2 }}
-          >
-            Create New Tracker
-          </Button>
+         
 
           {/* Popup for Creating New Tracker */}
           <Dialog open={isCreateTrackerPopupOpen} onClose={() => setIsCreateTrackerPopupOpen(false)} maxWidth="sm" fullWidth>

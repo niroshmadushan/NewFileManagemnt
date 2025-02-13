@@ -143,14 +143,7 @@ const DocumentTracker = () => {
               ),
             }}
           />
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={handleCreateTracker}
-            sx={{ width: '100%', marginBottom: 2 }}
-          >
-            Create New Tracker
-          </Button>
+        
           <TextField
             label="New Tracker Name"
             value={newTrackerName}
