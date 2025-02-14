@@ -2,7 +2,8 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Typewriter from 'typewriter-effect'; // Install this package for typing animation
-import img from './informationliteracy-scaled-removebg-preview.png'
+import img from './picture.png'; // Replace with a relevant image for file management
+
 const Adminbrd = () => {
   const theme = useTheme(); // Access the current theme
 
@@ -13,8 +14,7 @@ const Adminbrd = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '80px',
-        height: '90vh',
-      
+        height: '80vh',
       }}
     >
       {/* Left Section: Welcome Message */}
@@ -29,7 +29,10 @@ const Adminbrd = () => {
         >
           <Typewriter
             options={{
-              strings: ['Welcome, Admin!', 'Manage Your Portal Seamlessly!'],
+              strings: [
+                'Welcome to the SyncUp Platform!',
+                'Effortless File Management and Collaboration!'
+              ],
               autoStart: true,
               loop: true,
             }}
@@ -42,15 +45,15 @@ const Adminbrd = () => {
             lineHeight: '1.8',
           }}
         >
-          This application is a powerful admin portal that helps you manage your users and control
-          their access to critical modules. With this tool, you can:
+          SyncUp is your ultimate file management solution, designed to help organizations securely store, organize, and share documents effortlessly. With this platform, you can:
         </Typography>
         <Box component="ul" sx={{ marginTop: '20px', color: theme.palette.text.secondary }}>
-          <li>Create and manage new users.</li>
-          <li>Enable or disable user access.</li>
-          <li>Manage module permissions effortlessly.</li>
-          <li>Monitor and manage network device information.</li>
-          <li>Analyze and access network usage metrics.</li>
+          <li>Organize and manage files securely across teams.</li>
+          <li>Share documents with controlled access and permissions.</li>
+          <li>Track file versions and maintain document integrity.</li>
+          <li>Enable seamless collaboration with real-time file sharing.</li>
+          <li>Ensure compliance with advanced security and audit trails.</li>
+          <li>Generate reports on file usage and access analytics.</li>
         </Box>
         <Typography
           variant="body1"
@@ -59,8 +62,7 @@ const Adminbrd = () => {
             marginTop: '20px',
           }}
         >
-          This tool is designed to provide detailed insights into network device usage and help
-          manage your organization's IT infrastructure effectively.
+          SyncUp empowers organizations to take full control of their digital assets, enhancing productivity, security, and efficiency in file management.
         </Typography>
       </Box>
 
@@ -75,12 +77,11 @@ const Adminbrd = () => {
         }}
       >
         <img
-          src={img} // Replace with an actual relevant image URL
-          alt="Admin Portal Illustration"
+          src={img} // Replace with an actual relevant image URL for file management
+          alt="File Management Illustration"
           style={{
             maxWidth: '100%',
             borderRadius: '8px',
-           
           }}
         />
       </Box>

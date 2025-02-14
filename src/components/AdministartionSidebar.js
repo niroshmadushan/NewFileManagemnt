@@ -17,51 +17,47 @@ import {
 import {
   Dashboard,
   People,
-  Assignment,
-  Task,
-  Settings,
-  Logout,
-  WarningAmber,
-  DevicesOther,
+  Business,
+  Payment,
+  Forum,
   AccountCircle,
   ExpandLess,
   ExpandMore,
-} from '@mui/icons-material'; // Updated icons
-import { useTheme } from '@mui/material/styles'; // Access theme
-import { getUserDetails, logout } from '../services/userService'; // Import service methods
+  Logout,
+  WarningAmber,
+} from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
+import { getUserDetails, logout } from '../services/userService';
 
 const AdminSidebar = ({ onNavigate }) => {
-  const theme = useTheme(); // Get the current theme (light/dark)
-  const [user, setUser] = useState({}); // State for user details
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State for logout confirmation dialog
-  const [allowedNavItems, setAllowedNavItems] = useState([]); // State for allowed navigation items
-  const [openPlanMenu, setOpenPlanMenu] = useState(false); // State for Plan sub-menu
-  const [openTaskMenu, setOpenTaskMenu] = useState(false); // State for Task sub-menu
+  const theme = useTheme();
+  const [user, setUser] = useState({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [allowedNavItems, setAllowedNavItems] = useState([]);
+  const [openPlanMenu, setOpenPlanMenu] = useState(false);
+  const [openTaskMenu, setOpenTaskMenu] = useState(false);
 
-  // Fetch user details on component mount
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const response = await getUserDetails();
-        setUser(response); // Update user details
+        setUser(response);
 
-        // Define navigation items and their corresponding permission keys
         const navItems = [
-          { text: 'Dashboard', icon: <Dashboard />, action: 'dashboard', permissionKey: null }, // No permission required for dashboard
-          { text: 'Emplye MGT', icon: <DevicesOther />, action: 'usermgt', permissionKey: null },
-          { text: 'ORG Info', icon: <DevicesOther />, action: 'cominfo', permissionKey: null },
-          { text: 'Payment', icon: <DevicesOther />, action: 'payment', permissionKey: null },
-          { text: 'Community', icon: <AccountCircle />, action: 'com', permissionKey: null },
+          { text: 'Dashboard', icon: <Dashboard />, action: 'dashboard', permissionKey: null },
+          { text: 'Employee Management', icon: <People />, action: 'usermgt', permissionKey: null },
+          { text: 'Organization Info', icon: <Business />, action: 'cominfo', permissionKey: null },
+          { text: 'Payment', icon: <Payment />, action: 'payment', permissionKey: null },
+          { text: 'Community', icon: <Forum />, action: 'com', permissionKey: null },
           { text: 'User Info', icon: <AccountCircle />, action: 'ChangePassword', permissionKey: null },
         ];
 
-        // Filter navigation items based on user permissions
         const allowedItems = navItems.filter((item) => {
-          if (item.permissionKey === null) return true; // Always allow items with no permission key
-          return response.data[0][item.permissionKey] === 1; // Check if permission is allowed
+          if (item.permissionKey === null) return true;
+          return response.data[0][item.permissionKey] === 1;
         });
 
-        setAllowedNavItems(allowedItems); // Set allowed navigation items
+        setAllowedNavItems(allowedItems);
       } catch (error) {
         console.error('Error fetching user details:', error);
       }
@@ -69,12 +65,11 @@ const AdminSidebar = ({ onNavigate }) => {
     fetchUserDetails();
   }, []);
 
-  // Handle logout
   const handleLogout = async () => {
     try {
-      await logout(); // Call the logout API
-      localStorage.clear(); // Clear local storage
-      window.location.href = '/login'; // Redirect to login page
+      await logout();
+      localStorage.clear();
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -88,12 +83,10 @@ const AdminSidebar = ({ onNavigate }) => {
     setIsDialogOpen(false);
   };
 
-  // Toggle Plan sub-menu
   const togglePlanMenu = () => {
     setOpenPlanMenu(!openPlanMenu);
   };
 
-  // Toggle Task sub-menu
   const toggleTaskMenu = () => {
     setOpenTaskMenu(!openTaskMenu);
   };
@@ -111,7 +104,6 @@ const AdminSidebar = ({ onNavigate }) => {
         justifyContent: 'space-between',
       }}
     >
-      {/* Profile Section */}
       <Box
         sx={{
           display: 'flex',
@@ -134,7 +126,6 @@ const AdminSidebar = ({ onNavigate }) => {
         </Box>
       </Box>
 
-      {/* Navigation List */}
       <List sx={{ flexGrow: 1 }}>
         {allowedNavItems.map((item, index) => (
           <React.Fragment key={index}>
@@ -211,14 +202,13 @@ const AdminSidebar = ({ onNavigate }) => {
         ))}
       </List>
 
-      {/* Logout Button */}
       <Box sx={{ padding: '20px', borderTop: `1px solid ${theme.palette.divider}` }}>
         <Button
           startIcon={<Logout />}
           fullWidth
           variant="contained"
-          color="error" // Set button color to red
-          onClick={handleOpenDialog} // Open confirmation dialog
+          color="error"
+          onClick={handleOpenDialog}
           sx={{
             fontWeight: 'bold',
             textTransform: 'none',
@@ -228,7 +218,6 @@ const AdminSidebar = ({ onNavigate }) => {
         </Button>
       </Box>
 
-      {/* Logout Confirmation Dialog */}
       <Dialog
         open={isDialogOpen}
         onClose={handleCloseDialog}
@@ -249,8 +238,8 @@ const AdminSidebar = ({ onNavigate }) => {
           </Button>
           <Button
             onClick={() => {
-              handleCloseDialog(); // Close dialog
-              handleLogout(); // Proceed with logout
+              handleCloseDialog();
+              handleLogout();
             }}
             color="error"
             variant="contained"

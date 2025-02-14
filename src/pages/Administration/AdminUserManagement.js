@@ -64,7 +64,7 @@ const AdminUserManagement = () => {
     phone_number: '',
     role: 'user',
     is_active: true,
-    password_hashed: '@#UserVMS12345@#', // Default password (string)
+    password_hashed: '@#UserFMS12345@#', // Default password (string)
     pass: false, // Default to false (boolean)
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,7 +117,7 @@ const AdminUserManagement = () => {
       phone_number: '',
       role: 'user',
       is_active: true,
-      password_hashed: '@#UserVMS12345@#', // Reset to default password
+      password_hashed: '@#UserFMS12345@#', // Reset to default password
       pass: false, // Reset to false
     });
   };
@@ -283,14 +283,14 @@ Your password has been reset by the administration for security purposes. Please
 
 ### Account Details:
   **Username:** ${user.email}
-  **PassWord:** @#UserVMS12345@#
+  **PassWord:** @#UserFMS12345@#
 
 ### Next Steps:
 1. Log in to your SyncUp account using the link below.
 2. Go to your **Account Settings**.
 3. Set a new, strong password to secure your account.
 
-🔗 **Login Here:** https://syncup.connexcodeworks.com/login
+🔗 **Login Here:** https://syncup.platform.com/login
 
 If you did not request this reset or need assistance, please contact our support team at support@connexcodeworks.com.
 
@@ -315,13 +315,14 @@ Your password has been reset by the administration for security purposes. Please
 
 ### Account Details:
 - **Username:** ${user.email}
+- **PassWord:** @#UserFMS12345@#
 
 ### Next Steps:
 1. Log in to your SyncUp account using the link below.
 2. Go to your **Account Settings**.
 3. Set a new, strong password to secure your account.
 
-🔗 **Login Here:** https://syncup.connexcodeworks.com/login
+🔗 **Login Here:** https://syncup.platform.com/login
 
 If you did not request this reset or need assistance, please contact our support team at support@connexcodeworks.com.
 

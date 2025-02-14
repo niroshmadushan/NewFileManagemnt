@@ -129,7 +129,37 @@ const PaymentPage = () => {
 
             await insertData('payment_requests', paymentData);
             toast.success('Payment request submitted successfully!');
-            setPayments([...payments, paymentData]);
+            const userDetails = await getUserDetails();
+            if (!userDetails || !userDetails.company_id) {
+                throw new Error("User details not found.");
+            }
+            const companyId = userDetails.company_id;
+
+            // Fetch company details
+            const companyResponse = await selectData('company', { id: companyId });
+            if (companyResponse.data.length > 0) {
+                setCompanyDetails(companyResponse.data[0]);
+            } else {
+                setCompanyDetails(null);
+                console.warn("No company details found.");
+            }
+
+            // Fetch subscription plans
+            const plansResponse = await selectData('subscription_plans', { is_active: true });
+            setSubscriptionPlans(plansResponse.data || []);
+
+            // Fetch bank details
+            const bankResponse = await selectData('bank_details');
+            setBankDetails(bankResponse.data || []);
+
+            // Fetch payment requests
+            const paymentsResponse = await selectData('payment_requests', { company_id: companyId });
+            const formattedPayments = paymentsResponse.data.map(payment => ({
+                ...payment,
+                bank_slip_status: payment.bank_slip_status || 'Not Uploaded',
+            }));
+
+            setPayments(formattedPayments);
             setPaymentStatus('Pending');
             setShowPaymentForm(false);
         } catch (error) {
@@ -269,6 +299,37 @@ const PaymentPage = () => {
             setUploadProgress(100);
             setUploadedFile(null);
             setSelectedPayment(null);
+                  const userDetails = await getUserDetails();
+            if (!userDetails || !userDetails.company_id) {
+                throw new Error("User details not found.");
+            }
+            const companyId = userDetails.company_id;
+
+            // Fetch company details
+            const companyResponse = await selectData('company', { id: companyId });
+            if (companyResponse.data.length > 0) {
+                setCompanyDetails(companyResponse.data[0]);
+            } else {
+                setCompanyDetails(null);
+                console.warn("No company details found.");
+            }
+
+            // Fetch subscription plans
+            const plansResponse = await selectData('subscription_plans', { is_active: true });
+            setSubscriptionPlans(plansResponse.data || []);
+
+            // Fetch bank details
+            const bankResponse = await selectData('bank_details');
+            setBankDetails(bankResponse.data || []);
+
+            // Fetch payment requests
+            const paymentsResponse = await selectData('payment_requests', { company_id: companyId });
+            const formattedPayments = paymentsResponse.data.map(payment => ({
+                ...payment,
+                bank_slip_status: payment.bank_slip_status || 'Not Uploaded',
+            }));
+
+            setPayments(formattedPayments);
 
         } catch (error) {
             console.error('Upload error:', error);

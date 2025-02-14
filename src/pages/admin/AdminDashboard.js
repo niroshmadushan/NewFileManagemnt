@@ -13,6 +13,7 @@ import { Business as BusinessIcon, CardMembership as PlanIcon} from '@mui/icons-
 import { updateApiKey, getUserDetails } from '../../services/userService'; // Import the updateApiKey function
 import { selectData } from '../../services/dataService';
 import { IconButton, Modal, TextField, Button, Box, Typography, Snackbar, Alert, Grid, Paper } from '@mui/material';
+import PaymentPage from './PaymentPage';
 const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState('dashboard'); // Tracks the current page
   const { darkMode, toggleTheme } = useContext(ThemeContext); // Access ThemeContext
@@ -102,7 +103,7 @@ const AdminDashboard = () => {
               <Paper sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 2, boxShadow: 'none', outline: 'none' }}>
                 <BusinessIcon fontSize="large" />
                 <Box>
-                  <Typography variant="h6">Company : CodeWorks PVT LTD</Typography>
+                  <Typography variant="h7">Company : CodeWorks PVT LTD</Typography>
                   <Typography variant="body1"></Typography>
                 </Box>
               </Paper>
@@ -111,7 +112,7 @@ const AdminDashboard = () => {
               <Paper sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 2, boxShadow: 'none', outline: 'none',width:'300px' }}>
                 <PlanIcon fontSize="large" />
                 <Box>
-                  <Typography variant="h6">Administartion Account</Typography>
+                  <Typography variant="h7">Administartion Account</Typography>
                   <Typography variant="body1"></Typography>
                 </Box>
               </Paper>
@@ -127,6 +128,7 @@ const AdminDashboard = () => {
         {currentPage === 'Company' && <CompanyManagement />}
         {currentPage === 'Plans' && <SubscriptionPlanManagement />}
         {currentPage === 'Subscription' && <CompanySubscriptionManagement />}
+        {currentPage === 'payment' && <PaymentPage />}
       </div>
     </div>
   );

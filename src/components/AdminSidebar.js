@@ -116,6 +116,7 @@ useEffect(() => {
           { text: 'Company MGT', icon: <Business />, action: 'Company' },
           { text: 'Subscription', icon: <MonetizationOn />, action: 'Subscription' },
           { text: 'Plans', icon: <ListAlt />, action: 'Plans' },
+           { text: 'Payment', icon: <ListAlt />, action: 'payment', permissionKey: null },
           { text: 'User MGT', icon: <People />, action: 'create' },
           { text: 'Settings', icon: <AdminPanelSettings />, action: 'settings' },
         ].map((item, index) => (
