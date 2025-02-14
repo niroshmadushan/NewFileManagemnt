@@ -1,12 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Box, TextField, Button, InputAdornment, IconButton, Typography, Grid } from '@mui/material';
-import { Visibility, VisibilityOff, Lock, Person, Email, Phone, Business, Save } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Lock, Person, Email, Phone } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { AuthContext } from '../../context/AuthContext';
-import { getUserDetails,logout } from '../../services/userService';
-import { updateData } from '../../services/dataService';
-import { changePassword,changeUsername } from '../../services/authService'; // Import user service
-import { toast, Toaster } from 'react-hot-toast';
+import { logout, updateUserProfile, getUserDetails, updatePassword, updateEmail } from '../../services/userService';
+import { toast } from 'react-hot-toast';
+
 const ChangePassword = () => {
   const theme = useTheme(); // Get the current theme
   const { user } = useContext(AuthContext); // Access current user info
@@ -24,11 +23,10 @@ const ChangePassword = () => {
   });
 
   const [userInfo, setUserInfo] = useState({
-    id:'',
+    id: '',
     full_name: '',
     email: '',
     phone_number: '',
-    company_name: '',
   });
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,13 +36,11 @@ const ChangePassword = () => {
     const fetchUserDetails = async () => {
       try {
         const userData = await getUserDetails();
-        console.log(userData.data[0])
         setUserInfo({
-          id:userData.data[0].id || '',
-          full_name: userData.data[0].full_name || '',
-          email: userData.data[0].email || '',
-          phone_number: userData.data[0].phone_number || '',
-          company_name: userData.data[0].company_name || '',
+          id: userData.id || '',
+          full_name: userData.full_name || '',
+          email: userData.email || '',
+          phone_number: userData.phone_number || '',
         });
       } catch (error) {
         console.error('Failed to fetch user details:', error.message);
@@ -76,6 +72,19 @@ const ChangePassword = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate new password length
+    if (form.newPassword.length < 7) {
+      toast.error('New password must be at least 7 characters long!', {
+        style: {
+          background: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.divider}`,
+        },
+      });
+      return;
+    }
+
     if (form.newPassword !== form.confirmPassword) {
       toast.error('New password and confirmation do not match!', {
         style: {
@@ -86,10 +95,12 @@ const ChangePassword = () => {
       });
       return;
     }
-  
+
     try {
       // Call the service to change the password
-      await changePassword(form.oldPassword, form.newPassword);
+      const userData = await getUserDetails();
+      await updatePassword(userData.id, form.oldPassword, form.newPassword);
+
       toast.success('Password changed successfully!', {
         style: {
           background: theme.palette.background.paper,
@@ -97,6 +108,7 @@ const ChangePassword = () => {
           border: `1px solid ${theme.palette.divider}`,
         },
       });
+
       setForm({ oldPassword: '', newPassword: '', confirmPassword: '' }); // Reset form
     } catch (error) {
       console.error('Error changing password:', error);
@@ -109,37 +121,66 @@ const ChangePassword = () => {
       });
     }
   };
-  
-  const handleUserInfoUpdate = async () => {
-    if (!userInfo.full_name || !userInfo.phone_number) {
-      
-      return;
-    }
-  
+
+  const handleUpdateProfile = async () => {
     try {
-      // Step 1: Update the username
-      // Step 2: Update the user information in the `userinfo` table
-      const updates = {
-        full_name: userInfo.full_name,
-        phone_number: userInfo.phone_number,
-      };
-      const where = { id: userInfo.id }; // Use userinfo.id as the unique identifier
-  
-      await updateData('user_accounts', updates, where);
-  
+      // Fetch the original user details
+      const originalUserData = await getUserDetails();
+
+      // Create an object to hold only the changed fields
+      const updatedFields = {};
+
+      if (userInfo.full_name !== originalUserData.full_name) {
+        updatedFields.full_name = userInfo.full_name;
+      }
+
+      if (userInfo.phone_number !== originalUserData.phone_number) {
+        updatedFields.phone_number = userInfo.phone_number;
+      }
+
+      if (userInfo.email !== originalUserData.email) {
+        updatedFields.email = userInfo.email;
+      }
+
+      // If no fields have been changed, show a message and return
+      if (Object.keys(updatedFields).length === 0) {
+        toast.info('No changes detected!', {
+          style: {
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            border: `1px solid ${theme.palette.divider}`,
+          },
+        });
+        return;
+      }
+
+      // Update profile information (only changed fields)
+      if (updatedFields.full_name || updatedFields.phone_number) {
+        await updateUserProfile(userInfo.id, {
+          full_name: updatedFields.full_name || originalUserData.full_name,
+          phone_number: updatedFields.phone_number || originalUserData.phone_number,
+        });
+      }
+
+      // Update email (if changed)
+      if (updatedFields.email) {
+        await updateEmail(userInfo.id, updatedFields.email);
+      }
+
       // Success toast message
-      toast.success('User information updated successfully!', {
+      toast.success('Profile updated successfully!', {
         style: {
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
           border: `1px solid ${theme.palette.divider}`,
         },
       });
-      await logout();
-      window.location.reload(true)
+
+      // Logout and reload the page
+      window.location.reload(true);
     } catch (error) {
-      console.error('Error updating user information:', error);
-      toast.error(error?.error || 'Failed to update user information. Please try again.', {
+      console.error('Error updating profile:', error);
+      toast.error(error?.error || 'Failed to update profile. Please try again.', {
         style: {
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
@@ -148,13 +189,11 @@ const ChangePassword = () => {
       });
     }
   };
-  
-  
 
   return (
     <Box
       sx={{
-        padding: 6
+        padding: 6,
       }}
     >
       {/* Page Title */}
@@ -176,11 +215,10 @@ const ChangePassword = () => {
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '50vh',
-          width:'100%',
-          backgroundColor: theme.palette.background.default, // Optional for background styling
+          width: '100%',
+          backgroundColor: theme.palette.background.default,
         }}
       >
-
         <Grid container spacing={4}>
           {/* Left Side: User Information */}
           <Grid item xs={12} md={4}>
@@ -219,7 +257,6 @@ const ChangePassword = () => {
                 margin="normal"
                 value={userInfo.email}
                 onChange={(e) => handleUserInfoChange('email', e.target.value)}
-                disabled
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -244,12 +281,10 @@ const ChangePassword = () => {
                 }}
               />
 
-              
-
               <Box
                 sx={{
                   display: 'flex',
-                  justifyContent: 'flex-end', // Aligns the button to the right
+                  justifyContent: 'flex-end',
                   marginTop: 3,
                 }}
               >
@@ -263,12 +298,11 @@ const ChangePassword = () => {
                       backgroundColor: theme.palette.primary.dark,
                     },
                   }}
-                  onClick={handleUserInfoUpdate}
+                  onClick={handleUpdateProfile}
                 >
-                  Update Information
+                  Update Profile
                 </Button>
               </Box>
-
             </Box>
           </Grid>
 
@@ -279,7 +313,6 @@ const ChangePassword = () => {
                 backgroundColor: theme.palette.background.paper,
                 padding: 3,
                 borderRadius: 2,
-
                 position: 'relative',
               }}
             >
@@ -377,7 +410,7 @@ const ChangePassword = () => {
                 <Box
                   sx={{
                     display: 'flex',
-                    justifyContent: 'flex-end', // Aligns the button to the right
+                    justifyContent: 'flex-end',
                     marginTop: 3,
                   }}
                 >
@@ -392,12 +425,10 @@ const ChangePassword = () => {
                         backgroundColor: theme.palette.primary.dark,
                       },
                     }}
-
                   >
                     Change Password
                   </Button>
                 </Box>
-
               </form>
             </Box>
           </Grid>

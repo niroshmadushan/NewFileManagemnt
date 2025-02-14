@@ -15,21 +15,14 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  ManageAccounts as ManageAccountsIcon,
-  GroupAdd as GroupAddIcon,
-  MarkEmailUnread as MarkEmailUnreadIcon,
-  Group as GroupIcon,
-  EventAvailable as EventAvailableIcon,
-  AccountCircle as AccountCircleIcon,
+  Folder as FolderIcon, // For File MGT
+  Description as DescriptionIcon, // For Doc Track
+  School as SchoolIcon, // For Course CNT
+  FolderShared as FolderSharedIcon, // For Doc Group
+  Groups as GroupsIcon, // For Community
+  Lock as LockIcon, // For User Info (Change Password)
   ExitToApp as ExitToAppIcon,
   WarningAmber as WarningAmberIcon,
-  Analytics as AnalyticsIcon,
-  Place as PlaceIcon,
-  People as PeopleIcon,
-  Email as EmailIcon,
-  Schedule as ScheduleIcon,
-  Lock as LockIcon,
-  HowToReg as HowToRegIcon,
 } from '@mui/icons-material'; // Updated icons
 import { useTheme } from '@mui/material/styles'; // Access theme
 import { getUserDetails, logout } from '../services/userService'; // Import service methods
@@ -50,10 +43,12 @@ const AdminSidebar = ({ onNavigate }) => {
         // Define navigation items and their corresponding permission keys
         const navItems = [
           { text: 'Dashboard', icon: <DashboardIcon />, action: 'dashboard', permissionKey: null },
-          { text: 'File MGT', icon: <AnalyticsIcon />, action: 'file', permissionKey: null },
-          { text: 'Doc Track', icon: <AnalyticsIcon />, action: 'doctrack', permissionKey: null },
-          { text: 'Course CNT', icon: <AnalyticsIcon />, action: 'coursecnt', permissionKey: null },
-          { text: 'Doc Group', icon: <AnalyticsIcon />, action: 'group', permissionKey: null },
+          { text: 'File MGT', icon: <FolderIcon />, action: 'file', permissionKey: null },
+          { text: 'Doc Track', icon: <DescriptionIcon />, action: 'doctrack', permissionKey: null },
+          { text: 'Course CNT', icon: <SchoolIcon />, action: 'coursecnt', permissionKey: null },
+          { text: 'Doc Group', icon: <FolderSharedIcon />, action: 'group', permissionKey: null },
+          { text: 'Community', icon: <GroupsIcon />, action: 'com', permissionKey: null },
+          { text: 'User Info', icon: <LockIcon />, action: 'ChangePassword', permissionKey: null },
         ];
 
         // Filter navigation items based on user permissions

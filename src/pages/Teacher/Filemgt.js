@@ -223,7 +223,7 @@ const FileExplorer = () => {
   };
 
   const getFileViewUrl = (relativePath) => {
-    return `http://172.20.10.2:3000/${relativePath}`;
+    return `http://192.168.12.50:3000/${relativePath}`;
   };
 
   const filteredMainFolders = mainFolders.filter(folder =>

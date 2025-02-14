@@ -234,7 +234,7 @@ const DocumentSharingGroupPage = () => {
   };
 
   const constructFileUrl = (filePath) => {
-    const baseUrl = "http://172.20.10.2:3000/uploads"; // Replace with your actual base URL
+    const baseUrl = "http://192.168.12.50:3000/uploads"; // Replace with your actual base URL
     const cleanedFilePath = filePath.replace(/^\/+/, "");
     return `${baseUrl}/${cleanedFilePath}`;
   };

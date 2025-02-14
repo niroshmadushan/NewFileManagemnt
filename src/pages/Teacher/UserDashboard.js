@@ -14,7 +14,7 @@ import DocumentTracker from './DocumentTracker';
 import CourseManagement from './CourseCreation';
 import CourseContentManagement from './CourseContentManagement';
 import DocumentSharingPage from './DocumentSharingPage ';
-
+import CommunityPage from './CommunityPage';
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
   return (
@@ -317,7 +317,8 @@ const UserDashboard = () => {
         {currentPage === 'courseadd' && <CourseManagement />}
         {currentPage === 'coursecnt' && <CourseContentManagement />}
         {currentPage === 'group' && <DocumentSharingPage />}
-       
+        {currentPage === 'com' && <CommunityPage />}
+        {currentPage === 'ChangePassword' && <ChangePassword />}
       </div>
     </div>
   );

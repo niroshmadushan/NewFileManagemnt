@@ -167,8 +167,27 @@ const DocumentSharingGroupPage = () => {
       setNewGroupName("");
       setNewGroupDescription("");
       setSelectedMembers([]);
-      const groupsResponse = await selectData("doc_groups", { created_by: currentUserId });
-      setGroups(groupsResponse.data);
+      const userDetails = await getUserDetails();
+      setCurrentUserId(userDetails.id);
+      setCompanyId(userDetails.company_id);
+
+      const usersData = await selectDataProfiles({ company_id: userDetails.company_id });
+      setUsers(usersData.data);
+
+      // Fetch group member IDs
+      const groupsMemberResponse = await selectData("doc_group_members", { user_id: userDetails.id });
+      const groupIds = groupsMemberResponse.data // Extracting IDs
+
+      // Fetch group details for all found group IDs
+      let allGroups = [];
+      for (const groupId of groupIds) {
+        const groupResponse = await selectData("doc_groups", { id: groupId.group_id });
+        if (groupResponse.data) {
+          allGroups = [...allGroups, ...groupResponse.data];
+        }
+      }
+
+      setGroups(allGroups);
     } catch (error) {
       console.error("Error creating group:", error);
       toast.error("Failed to create group.");
@@ -234,7 +253,7 @@ const DocumentSharingGroupPage = () => {
   };
 
   const constructFileUrl = (filePath) => {
-    const baseUrl = "http://172.20.10.2:3000/uploads"; // Replace with your actual base URL
+    const baseUrl = "http://192.168.12.50:3000/uploads"; // Replace with your actual base URL
     const cleanedFilePath = filePath.replace(/^\/+/, "");
     return `${baseUrl}/${cleanedFilePath}`;
   };
@@ -364,6 +383,15 @@ const DocumentSharingGroupPage = () => {
           }}
           sx={{ mb: 2 }}
         />
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => setOpenGroupDialog(true)}
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          Add New Group
+        </Button>
         <Box
           sx={{
             padding: 2,
@@ -445,7 +473,7 @@ const DocumentSharingGroupPage = () => {
                   contents.map((content) => (
                     <Grid item xs={12} key={content.id}>
                       <Card sx={{ p: 2, boxShadow: 'none', position: 'relative' }}>
-                        
+
                         <Box sx={{ textAlign: "left" }}>
                           <Typography variant="h6">{content.title}</Typography>
                           <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>

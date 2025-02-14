@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import Typewriter from 'typewriter-effect'; // Install this package for typing animation
-import img from './homepic.png'; // Replace with a relevant image for visitor management
+import img from './picture.png'; // Replace with a relevant image for file management
 
 const Adminbrd = () => {
   const theme = useTheme(); // Access the current theme
@@ -30,8 +30,8 @@ const Adminbrd = () => {
           <Typewriter
             options={{
               strings: [
-                'Welcome to the SmartV Platform!',
-                'Streamline Visitor Check-ins and Security!',
+                'Welcome to the SyncUp Platform!',
+                'Effortless File Management and Collaboration!'
               ],
               autoStart: true,
               loop: true,
@@ -45,15 +45,15 @@ const Adminbrd = () => {
             lineHeight: '1.8',
           }}
         >
-          This platform is designed to help you manage visitors efficiently, enhance security, and streamline the check-in process. With this tool, you can:
+          SyncUp is your ultimate file management solution, designed to help organizations securely store, organize, and share documents effortlessly. With this platform, you can:
         </Typography>
         <Box component="ul" sx={{ marginTop: '20px', color: theme.palette.text.secondary }}>
-          <li>Register and track visitors in real-time.</li>
-          <li>Issue visitor badges for secure access.</li>
-          <li>Notify hosts about visitor arrivals instantly.</li>
-          <li>Maintain a digital log of all visitor entries and exits.</li>
-          <li>Enhance security with pre-registration and approval workflows.</li>
-          <li>Generate detailed visitor reports for audits and analysis.</li>
+          <li>Organize and manage files securely across teams.</li>
+          <li>Share documents with controlled access and permissions.</li>
+          <li>Track file versions and maintain document integrity.</li>
+          <li>Enable seamless collaboration with real-time file sharing.</li>
+          <li>Ensure compliance with advanced security and audit trails.</li>
+          <li>Generate reports on file usage and access analytics.</li>
         </Box>
         <Typography
           variant="body1"
@@ -62,7 +62,7 @@ const Adminbrd = () => {
             marginTop: '20px',
           }}
         >
-          This platform empowers you to create a seamless and secure visitor management experience, ensuring safety and efficiency for your organization.
+          SyncUp empowers organizations to take full control of their digital assets, enhancing productivity, security, and efficiency in file management.
         </Typography>
       </Box>
 
@@ -77,8 +77,8 @@ const Adminbrd = () => {
         }}
       >
         <img
-          src={img} // Replace with an actual relevant image URL for visitor management
-          alt="Visitor Management Illustration"
+          src={img} // Replace with an actual relevant image URL for file management
+          alt="File Management Illustration"
           style={{
             maxWidth: '100%',
             borderRadius: '8px',

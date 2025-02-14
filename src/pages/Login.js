@@ -143,12 +143,10 @@ const Login = () => {
                 style={{ marginBottom: 20, borderRadius:10,maxWidth: isTablet ? '0%' : '70%' }} // Adjust logo size for tablet
               />
               <Typography variant="h4" gutterBottom>
-                Welcome to Smart Visitor
+                Welcome to SyncUP
               </Typography>
               <Typography variant="body1" color="textSecondary">
-                Smart Visitor is your ultimate Visitor Management System. Effortlessly manage visitor check-ins,
-                track visitor data, and ensure security with real-time monitoring. SmartV empowers organizations
-                to streamline visitor registration, enhance security, and maintain a seamless visitor experience.
+              SyncUp is your ultimate File Management System. Effortlessly organize, store, and access files with advanced security and real-time collaboration. SyncUp empowers organizations to streamline document management, enhance data security, and ensure seamless file sharing across teams.
               </Typography>
             </Box>
           </Grid>
@@ -182,7 +180,7 @@ const Login = () => {
                 marginBottom: 2,
               }}
             >
-              Login to Smart Visitor
+              Login to SyncUP
             </Typography>
 
             <TextField
