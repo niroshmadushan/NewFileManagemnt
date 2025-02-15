@@ -10,7 +10,15 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    IconButton,
+    InputAdornment,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import SchoolIcon from '@mui/icons-material/School';
 import { selectData, insertData } from '../../services/dataService';
 import { getUserDetails } from '../../services/userService';
 import { toast } from 'react-hot-toast';
@@ -22,6 +30,8 @@ const StudentCourses = () => {
     const [pin, setPin] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [year, setYear] = useState('');
     const { darkMode } = useContext(ThemeContext);
 
     // Fetch the current user details and courses
@@ -32,10 +42,10 @@ const StudentCourses = () => {
                 const userId = userDetails.id;
 
                 // Fetch all courses
-                const allCourses = await selectData('courses', { is_deleted: 0, is_active: 1 });
+                const allCourses = await selectData('courses', { is_deleted: false, is_active: true ,company_id:userDetails.company_id});
 
                 // Fetch courses the student has already attended
-                const attendedCourses = await selectData('student_course', { user_id: userId, is_deleted: 0 });
+                const attendedCourses = await selectData('student_course', { user_id: userId, is_deleted: false });
 
                 // Filter out courses the student has already attended
                 const availableCourses = allCourses.data.filter(course => 
@@ -97,13 +107,71 @@ const StudentCourses = () => {
         }
     };
 
+    // Handle search term change
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        filterCourses(e.target.value, year);
+    };
+
+    // Handle year filter change
+    const handleYearChange = (e) => {
+        setYear(e.target.value);
+        filterCourses(searchTerm, e.target.value);
+    };
+
+    // Filter courses based on search term and year
+    const filterCourses = (searchTerm, year) => {
+        let filtered = courses;
+        if (searchTerm) {
+            filtered = filtered.filter(course => course.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+        if (year) {
+            filtered = filtered.filter(course => course.year === year);
+        }
+        setFilteredCourses(filtered);
+    };
+
     return (
         <Box sx={{ padding: 2 }}>
             {/* Page Header */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SchoolIcon fontSize="large" />
                     Available Courses
                 </Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControl variant="outlined" sx={{width:100}}>
+                        <InputLabel id="year-label">Year</InputLabel>
+                        <Select
+                            labelId="year-label"
+                            value={year}
+                            onChange={handleYearChange}
+                            label="Year"
+                        >
+                            <MenuItem value="">
+                                <em>All</em>
+                            </MenuItem>
+                            <MenuItem value={2023}>2023</MenuItem>
+                            <MenuItem value={2024}>2024</MenuItem>
+                            <MenuItem value={2025}>2025</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        label="Search"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                   
+                </Box>
             </Box>
 
             {/* Course Cards */}
@@ -133,21 +201,34 @@ const StudentCourses = () => {
                             <Box
                                 sx={{
                                     p: 2,
-                                    border: '1px solid',
-                                    borderColor: darkMode ? '#424242' : '#e0e0e0',
+                                   
                                     borderRadius: '8px',
                                     backgroundColor: darkMode ? '#333' : '#fff',
                                     color: darkMode ? '#fff' : '#000',
                                     cursor: 'pointer',
-                                    '&:hover': {
-                                        boxShadow: 3,
-                                    },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    height: '100%',
+                                   
                                 }}
                                 onClick={() => handleCourseClick(course)}
                             >
-                                <Typography variant="h6">{course.name}</Typography>
-                                <Typography variant="body2">{course.description}</Typography>
-                                <Button variant="contained" sx={{ mt: 2 }}>
+                                <Box>
+                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <SchoolIcon />
+                                        {course.name}
+                                    </Typography>
+                                    <Typography variant="body2">{course.description}</Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    sx={{ alignSelf: 'flex-end', mt: 2 }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCourseClick(course);
+                                    }}
+                                >
                                     Attend Now
                                 </Button>
                             </Box>

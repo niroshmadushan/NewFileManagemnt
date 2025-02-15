@@ -316,7 +316,7 @@ const UserDashboard = () => {
         {currentPage === 'dashboard' && <Userbrd />}
         {currentPage === 'file' && <Filemgt />}
         {currentPage === 'doctrack' && <DocumentTracker />}
-        {currentPage === 'courseadd' && <CourseManagement />}
+ 
         {currentPage === 'coursecnt' && <CourseContentManagement />}
         {currentPage === 'group' && <DocumentSharingPage />}
         {currentPage === 'com' && <CommunityPage />}

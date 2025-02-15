@@ -4,6 +4,7 @@ import ChangePassword from './ChangePassword';
 import TeamManagement from './TeamManagement';
 import Userbrd from './Userbrd';
 import logo from './image.png';
+import CourseManagement from './CourseCreation';
 import { ThemeContext } from '../../context/ThemeContext';
 import {
   IconButton,
@@ -399,6 +400,7 @@ const UserDashboard = () => {
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'cominfo' && <CompanyInformation />}
         {currentPage === 'payment' && <PaymentPage />}
+               {currentPage === 'courseadd' && <CourseManagement />}
       </div>
     </div>
   );
