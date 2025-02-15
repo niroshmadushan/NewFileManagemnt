@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { logout, getUserDetails } from './userService';
 
-const BASE_URL = 'http://192.168.12.50:3000/api';
+const BASE_URL = 'http://localhost:3000/api';
 
 // Helper function to get and set the new tokens in headers
 const setAuthHeaders = () => {

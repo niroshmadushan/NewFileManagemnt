@@ -48,6 +48,7 @@ const AdminSidebar = ({ onNavigate }) => {
           { text: 'Course Attend', icon: <FolderSharedIcon />, action: 'courseattend', permissionKey: null },
           { text: 'Course Content', icon: <SchoolIcon />, action: 'coursecnt', permissionKey: null },
           { text: 'Doc Group', icon: <FolderSharedIcon />, action: 'group', permissionKey: null },
+          { text: 'Doc Request', icon: <FolderSharedIcon />, action: 'docreq', permissionKey: null },
           { text: 'Community', icon: <GroupsIcon />, action: 'com', permissionKey: null },
           { text: 'User Info', icon: <LockIcon />, action: 'ChangePassword', permissionKey: null },
         ];

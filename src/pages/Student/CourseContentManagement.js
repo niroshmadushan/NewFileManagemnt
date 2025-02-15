@@ -35,7 +35,7 @@ import { getUserDetails } from "../../services/userService";
 
 // Helper function to construct the full URL for files/images
 const constructFileUrl = (filePath) => {
-  const baseUrl = "http://192.168.12.50:3000/uploads"; // Replace with your actual base URL
+  const baseUrl = "http://localhost:3000/uploads"; // Replace with your actual base URL
   const cleanedFilePath = filePath.replace(/^\/+/, "");
   return `${baseUrl}/${cleanedFilePath}`;
 };

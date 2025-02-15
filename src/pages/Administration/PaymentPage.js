@@ -261,7 +261,7 @@ const PaymentPage = () => {
         try {
             // Fetch the file path from the database or file service
 
-            window.open('http://192.168.12.50:3000/uploads/' + getFileNameFromLink(payment.file_link), '_blank')
+            window.open('http://localhost:3000/uploads/' + getFileNameFromLink(payment.file_link), '_blank')
 
         } catch (error) {
             console.error('Error viewing PDF:', error);

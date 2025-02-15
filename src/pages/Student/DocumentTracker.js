@@ -304,9 +304,7 @@ const DocumentTracker = () => {
                   <Button variant="contained" startIcon={<Add />} onClick={() => setIsAddTaskPopupOpen(true)} sx={{ marginRight: 1 }}>
                     Add Task
                   </Button>
-                  <Button variant="outlined" onClick={() => setIsRenameTrackerPopupOpen(true)}>
-                    Rename
-                  </Button>
+
                 </Box>
               </Box>
               <Grid container spacing={2} sx={{
@@ -348,7 +346,7 @@ const DocumentTracker = () => {
                         </Typography>
                       </CardContent>
                       <CardActions>
-                        <Button onClick={() => window.open('http://192.168.12.50:3000/uploads/' + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
+                        <Button onClick={() => window.open('http://localhost:3000/uploads/' + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
                       </CardActions>
                     </Card>
                   </Grid>

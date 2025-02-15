@@ -18,6 +18,8 @@
     "framer-motion": "^11.18.0",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-countup": "^6.5.3",
