@@ -29,6 +29,8 @@ import 'jspdf-autotable';
 
 const PaymentPage = () => {
     const theme = useTheme();
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState(null);
@@ -239,7 +241,7 @@ const PaymentPage = () => {
         try {
             // Fetch the file path from the database or file service
 
-            window.open('http://192.168.12.50:3000/uploads/' + getFileNameFromLink(payment.file_link), '_blank')
+            window.open(`${apiUrl}:3000/uploads/` + getFileNameFromLink(payment.file_link), '_blank')
 
         } catch (error) {
             console.error('Error viewing PDF:', error);
