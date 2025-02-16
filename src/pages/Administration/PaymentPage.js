@@ -36,6 +36,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 const PaymentPage = () => {
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
     const theme = useTheme();
     const [companyDetails, setCompanyDetails] = useState(null);
     const [subscriptionPlans, setSubscriptionPlans] = useState([]);
@@ -55,7 +56,7 @@ const PaymentPage = () => {
     }, []);
     const getFileViewUrl = (relativePath) => {
         // Replace with your server's base URL
-        const baseUrl = 'http://192.168.1.50:3000/uploads'; // Example: Your server URL
+        const baseUrl = `${apiUrl}/uploads`; // Example: Your server URL
         return `${baseUrl}/${relativePath}`;
     };
     const getFileNameFromLink = (link) => {
@@ -261,7 +262,7 @@ const PaymentPage = () => {
         try {
             // Fetch the file path from the database or file service
 
-            window.open('http://localhost:3000/uploads/' + getFileNameFromLink(payment.file_link), '_blank')
+            window.open(`${apiUrl}:3000/uploads/` + getFileNameFromLink(payment.file_link), '_blank')
 
         } catch (error) {
             console.error('Error viewing PDF:', error);

@@ -22,7 +22,7 @@ import { selectData, insertData, updateData } from '../../services/dataService';
 import { toast } from 'react-hot-toast';
 import { uploadFile, downloadFile } from '../../services/fileservice';
 import { getUserDetails } from '../../services/userService'; // Assuming you have a function to get user details
-
+const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
 const FileExplorer = () => {
   const theme = useTheme();
   const [mainFolders, setMainFolders] = useState([]);
@@ -223,7 +223,7 @@ const FileExplorer = () => {
   };
 
   const getFileViewUrl = (relativePath) => {
-    return `http://localhost:3000/${relativePath}`;
+    return `${apiUrl}:3000/${relativePath}`;
   };
 
   const filteredMainFolders = mainFolders.filter(folder =>

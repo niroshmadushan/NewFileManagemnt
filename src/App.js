@@ -16,17 +16,17 @@ const App = () => {
       {!isAuthenticated ? (
         <>
           {/* Login Route */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/app/login" element={<Login />} />
           {/* Redirect all unauthenticated users to /login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/app/login" replace />} />
         </>
       ) : (
         <>
           {/* Authenticated Routes */}
-          {user?.role === 'admin' && <Route path="/admin/*" element={<AdminRoutes />} />}
-          {user?.role === 'admin_com' && <Route path="/admin_com/*" element={<AdminCom />} />}
-          {user?.role === 'student' && <Route path="/student/*" element={<Student />} />}
-          {user?.role === 'teacher' && <Route path="/teacher/*" element={<Teacher />} />}
+          {user?.role === 'admin' && <Route path="/app/admin/*" element={<AdminRoutes />} />}
+          {user?.role === 'admin_com' && <Route path="/app/admin_com/*" element={<AdminCom />} />}
+          {user?.role === 'student' && <Route path="/app/student/*" element={<Student />} />}
+          {user?.role === 'teacher' && <Route path="/app/teacher/*" element={<Teacher />} />}
 
           {/* Redirect authenticated users to their role-specific dashboard */}
           <Route
@@ -35,12 +35,12 @@ const App = () => {
               <Navigate
                 to={
                   user?.role === 'admin'
-                    ? '/admin'
+                    ? '/app/admin'
                     : user?.role === 'admin_com'
-                      ? '/admin_com'
+                      ? '/app/admin_com'
                       : user?.role === 'student'
-                        ? '/student'
-                        : '/teacher' // Redirect team_member users to their dashboard
+                        ? '/app/student'
+                        : '/app/teacher' // Redirect team_member users to their dashboard
                 }
                 replace
               />

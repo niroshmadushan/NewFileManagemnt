@@ -45,7 +45,7 @@ const DocumentRequestPage = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [companyId, setCompanyId] = useState(null);
-
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
     useEffect(() => {
         fetchData();
     }, []);
@@ -164,7 +164,7 @@ const DocumentRequestPage = () => {
         }
 
         const fileName = getFileNameFromLink(docRequest.doc_link);
-        const fileUrl = `http://10.187.89.140:3000/uploads/${fileName}`;
+        const fileUrl = `${apiUrl}:3000/uploads/${fileName}`;
         console.log(`Fetching file from: ${fileUrl}`);
 
         try {
@@ -176,7 +176,7 @@ const DocumentRequestPage = () => {
             const pdfDoc = await PDFDocument.load(response.data);
 
             // Generate the QR code as a PNG data URL
-            const qrCodeUrl = `http://10.187.89.140:3000/api/data/validate/docreq?id=${docRequest.id}`;
+            const qrCodeUrl = `${apiUrl}:3000/api/data/validate/docreq?id=${docRequest.id}`;
             const qrCodeDataUrl = await generateQRCodeDataURL(qrCodeUrl);
             const qrImageBytes = await fetch(qrCodeDataUrl).then(res => res.arrayBuffer());
             const qrImage = await pdfDoc.embedPng(qrImageBytes);

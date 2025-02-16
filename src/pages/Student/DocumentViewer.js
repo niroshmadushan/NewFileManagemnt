@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Close } from '@mui/icons-material';
 
 const DocumentViewer = ({ docLink, qrCodeUrl, onClose }) => {
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
     return (
         <Box sx={{ position: 'relative', height: '100vh', width: '100vw', backgroundColor: '#fff' }}>
             <IconButton 
@@ -13,7 +14,7 @@ const DocumentViewer = ({ docLink, qrCodeUrl, onClose }) => {
                 <Close />
             </IconButton>
             <iframe
-                src={`http://localhost:3000/uploads/${docLink}`}
+                src={`${apiUrl}:3000/uploads/${docLink}`}
                 style={{ width: '100%', height: '100%', border: 'none' }}
                 title="Document Viewer"
             />

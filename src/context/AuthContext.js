@@ -32,7 +32,7 @@ const AuthContextProvider = ({ children }) => {
 
   // Function to validate the user's session
   const validateSession = async () => {
-    if (location.pathname === '/login') {
+    if (location.pathname === '/app/login') {
       setLoading(false); // Skip validation on the login page
       return;
     }

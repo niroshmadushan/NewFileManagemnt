@@ -27,7 +27,7 @@ import { selectData, insertData, updateData, selectDataProfiles } from "../../se
 import { uploadFile } from "../../services/fileservice";
 import { ThemeContext } from "../../context/ThemeContext";
 import { getUserDetails } from "../../services/userService";
-
+const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
 const DocumentSharingGroupPage = () => {
   const { darkMode } = useContext(ThemeContext);
   const theme = useTheme();
@@ -234,7 +234,7 @@ const DocumentSharingGroupPage = () => {
   };
 
   const constructFileUrl = (filePath) => {
-    const baseUrl = "http://192.168.12.50:3000/uploads"; // Replace with your actual base URL
+    const baseUrl = `${apiUrl}:3000/uploads`; // Replace with your actual base URL
     const cleanedFilePath = filePath.replace(/^\/+/, "");
     return `${baseUrl}/${cleanedFilePath}`;
   };

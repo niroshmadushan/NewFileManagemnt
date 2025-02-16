@@ -43,6 +43,7 @@ const DocumentTracker = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [users, setUsers] = useState([]);
+  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
 
   useEffect(() => {
     const fetchData = async () => {
@@ -346,7 +347,7 @@ const DocumentTracker = () => {
                         </Typography>
                       </CardContent>
                       <CardActions>
-                        <Button onClick={() => window.open('http://localhost:3000/uploads/' + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
+                        <Button onClick={() => window.open(`${apiUrl}:3000/uploads/` + getFileNameFromLink(record.file_link), '_blank')}>View</Button>
                       </CardActions>
                     </Card>
                   </Grid>

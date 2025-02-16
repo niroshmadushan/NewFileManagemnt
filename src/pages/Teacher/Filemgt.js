@@ -41,7 +41,7 @@ const FileExplorer = () => {
   const [renameSubFolderName, setRenameSubFolderName] = useState('');
   const [mainFolderSearchTerm, setMainFolderSearchTerm] = useState('');
   const [subFolderSearchTerm, setSubFolderSearchTerm] = useState('');
-
+  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
   useEffect(() => {
     const fetchMainFolders = async () => {
       try {
@@ -223,7 +223,7 @@ const FileExplorer = () => {
   };
 
   const getFileViewUrl = (relativePath) => {
-    return `http://localhost:3000/${relativePath}`;
+    return `${apiUrl}:3000/${relativePath}`;
   };
 
   const filteredMainFolders = mainFolders.filter(folder =>

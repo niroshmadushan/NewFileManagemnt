@@ -45,7 +45,7 @@ const DocumentSharingGroupPage = () => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [users, setUsers] = useState([]);
   const [userSearchQuery, setUserSearchQuery] = useState("");
-
+  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
   // States for the add content dialog
   const [openContentDialog, setOpenContentDialog] = useState(false);
   const [newContentTitle, setNewContentTitle] = useState("");
@@ -253,7 +253,7 @@ const DocumentSharingGroupPage = () => {
   };
 
   const constructFileUrl = (filePath) => {
-    const baseUrl = "http://localhost:3000/uploads"; // Replace with your actual base URL
+    const baseUrl = `${apiUrl}:3000/uploads`; // Replace with your actual base URL
     const cleanedFilePath = filePath.replace(/^\/+/, "");
     return `${baseUrl}/${cleanedFilePath}`;
   };

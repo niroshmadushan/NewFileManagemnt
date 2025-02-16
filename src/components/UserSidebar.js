@@ -70,7 +70,7 @@ const AdminSidebar = ({ onNavigate }) => {
     try {
       await logout(); // Call the logout API
       localStorage.clear(); // Clear local storage
-      window.location.href = '/'; // Redirect to login page
+      window.location.href = '/app/'; // Redirect to login page
     } catch (error) {
       console.error('Error during logout:', error);
     }
