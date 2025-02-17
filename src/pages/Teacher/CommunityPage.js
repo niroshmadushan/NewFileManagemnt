@@ -35,7 +35,7 @@ const CommunityPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messageBoxRef = useRef(null);
-
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
     // Fetch all users and current user details
     useEffect(() => {
         const fetchData = async () => {
@@ -117,9 +117,12 @@ const CommunityPage = () => {
     useEffect(() => {
         if (!currentUser.id) return;
 
-        const eventSource = new EventSource(`http://192.168.12.50:5000/updates?userId=${currentUser.id}`, {
-            withCredentials: true,
-        });
+        const eventSource = new EventSource(
+            `http://192.168.12.50:5000/updates?userId=${currentUser.id}&accessToken=${accessToken}&refreshToken=${refreshToken}`,
+            {
+                withCredentials: true, // Include credentials (cookies)
+            }
+        );  
 
         eventSource.onmessage = (event) => {
             const newMessage = JSON.parse(event.data);

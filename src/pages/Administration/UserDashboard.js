@@ -105,7 +105,7 @@ const UserDashboard = () => {
   const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showAlertIcon, setShowAlertIcon] = useState(false); // State to control alert icon visibility
-
+  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
   // Fetch company and subscription details
   useEffect(() => {
     const fetchCompanyAndSubscriptionDetails = async () => {
@@ -154,6 +154,18 @@ const UserDashboard = () => {
     fetchCompanyAndSubscriptionDetails();
   }, []);
 
+  const setAuthHeaders = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+  
+    return {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'x-refresh-token': refreshToken,
+      },
+      withCredentials: true,
+    };
+  };
   // Listen for new messages using SSE
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -162,9 +174,9 @@ const UserDashboard = () => {
         const userId = userDetails.id;
 
         // Create EventSource with credentials
-        const eventSource = new EventSource(`http://192.168.12.50:5000/updates?userId=${userId}`, {
-          withCredentials: true, // Include cookies in the request
-        });
+        const eventSource = new EventSource(`${apiUrl}:5000/updates?userId=${userId}`, {
+          withCredentials: true,
+      },setAuthHeaders());
 
         // Handle incoming messages
         eventSource.onmessage = (event) => {
