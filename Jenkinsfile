@@ -14,23 +14,23 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                bat "docker build -t %DOCKER_IMAGE% ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withDockerRegistry([credentialsId: 'docker_hub', url: '']) {
-                    sh "docker push ${DOCKER_IMAGE}"
+                    bat "docker push %DOCKER_IMAGE%"
                 }
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sh "docker stop jenkins-container || true"
-                sh "docker rm jenkins-container || true"
-                sh "docker run -d -p 3000:3000 --name jenkins-container ${DOCKER_IMAGE}"
+                bat "docker stop jenkins-container || exit 0"
+                bat "docker rm jenkins-container || exit 0"
+                bat "docker run -d -p 3000:3000 --name jenkins-container %DOCKER_IMAGE%"
             }
         }
     }
