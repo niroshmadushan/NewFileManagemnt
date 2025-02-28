@@ -27,7 +27,7 @@ import { selectData, insertData, updateData, selectDataProfiles } from "../../se
 import { uploadFile } from "../../services/fileservice";
 import { ThemeContext } from "../../context/ThemeContext";
 import { getUserDetails } from "../../services/userService";
-
+import API_URL from "../../api";
 const DocumentSharingGroupPage = () => {
   const { darkMode } = useContext(ThemeContext);
   const theme = useTheme();
@@ -45,7 +45,7 @@ const DocumentSharingGroupPage = () => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [users, setUsers] = useState([]);
   const [userSearchQuery, setUserSearchQuery] = useState("");
-  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+  const apiUrl = API_URL; // ✅ Correct
   // States for the add content dialog
   const [openContentDialog, setOpenContentDialog] = useState(false);
   const [newContentTitle, setNewContentTitle] = useState("");

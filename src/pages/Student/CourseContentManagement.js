@@ -32,10 +32,10 @@ import { selectData, insertData, updateData, selectDataProfiles } from "../../se
 import { uploadFile } from "../../services/fileservice";
 import { ThemeContext } from "../../context/ThemeContext";
 import { getUserDetails } from "../../services/userService";
-
+import API_URL from "../../api";
 // Helper function to construct the full URL for files/images
 const constructFileUrl = (filePath) => {
-  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+  const apiUrl = API_URL; // ✅ Correct
   const baseUrl = `${apiUrl}:3000/uploads`; // Replace with your actual base URL
   const cleanedFilePath = filePath.replace(/^\/+/, "");
   return `${baseUrl}/${cleanedFilePath}`;
@@ -416,7 +416,7 @@ const CourseContentManagement = () => {
         }}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>
-          📘 Courses
+          📘My Courses
         </Typography>
         <TextField
           fullWidth

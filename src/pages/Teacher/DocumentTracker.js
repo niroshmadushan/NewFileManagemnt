@@ -198,7 +198,7 @@ const DocumentTracker = () => {
     }}>
       <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2, color: theme.palette.text.primary }}>
         <Folder sx={{ fontSize: 32, color: 'primary.main' }} />
-        Document Tracker
+        Document Flow
       </Typography>
 
       <Grid container spacing={2} sx={{ flex: 1, overflow: 'hidden' }}>
@@ -212,7 +212,7 @@ const DocumentTracker = () => {
           overflow: 'hidden'
         }}>
           <TextField
-            label="Search Trackers"
+            label="Search Flows"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             fullWidth
@@ -231,15 +231,15 @@ const DocumentTracker = () => {
             onClick={() => setIsCreateTrackerPopupOpen(true)}
             sx={{ width: '100%', marginBottom: 2 }}
           >
-            Create New Tracker
+            Create New Flow
           </Button>
 
           {/* Popup for Creating New Tracker */}
           <Dialog open={isCreateTrackerPopupOpen} onClose={() => setIsCreateTrackerPopupOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle>Create New Tracker</DialogTitle>
+            <DialogTitle>Create New Flow</DialogTitle>
             <DialogContent>
               <TextField
-                label="Tracker Name"
+                label="Flow Name"
                 value={newTrackerName}
                 onChange={(e) => setNewTrackerName(e.target.value)}
                 fullWidth
@@ -411,7 +411,7 @@ const DocumentTracker = () => {
 
       {/* Popup for Renaming Tracker */}
       <Dialog open={isRenameTrackerPopupOpen} onClose={() => setIsRenameTrackerPopupOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Rename Tracker</DialogTitle>
+        <DialogTitle>Rename Flows</DialogTitle>
         <DialogContent>
           <TextField
             label="New Tracker Name"

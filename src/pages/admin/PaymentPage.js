@@ -26,10 +26,10 @@ import { selectData, insertData, updateData } from '../../services/dataService';
 import { getUserDetails } from '../../services/userService';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
+import API_URL from '../../api';
 const PaymentPage = () => {
     const theme = useTheme();
-    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+    const apiUrl = API_URL; // ✅ Correct
 
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -287,7 +287,6 @@ const PaymentPage = () => {
                                     <TableCell>Bank Slip Status</TableCell>
                                     <TableCell>Created At</TableCell>
                                     <TableCell>Download Invoice</TableCell>
-                                    <TableCell>Upload Bank Slip</TableCell>
                                     <TableCell>View Bank Slip</TableCell>
                                     <TableCell>Actions</TableCell>
                                 </TableRow>
@@ -343,19 +342,7 @@ const PaymentPage = () => {
                                                 Download
                                             </Button>
                                         </TableCell>
-                                        <TableCell>
-                                            {payment.status !== 'Approved' && (
-                                                <Button
-                                                    variant="outlined"
-                                                    startIcon={<CloudUpload />}
-                                                    onClick={() => setSelectedPayment(payment)}
-                                                    disabled={payment.status === 'Approved'}
-                                                    sx={{ color: theme.palette.mode === 'dark' ? 'primary.light' : 'primary.main' }}
-                                                >
-                                                    {payment.bank_slip_status === 'Uploaded' ? 'Update Slip' : 'Upload Slip'}
-                                                </Button>
-                                            )}
-                                        </TableCell>
+
                                         <TableCell>
                                             {payment.bank_slip_status === 'Uploaded' && (
                                                 <IconButton onClick={() => handleViewPdf(payment)}>
@@ -363,6 +350,8 @@ const PaymentPage = () => {
                                                 </IconButton>
                                             )}
                                         </TableCell>
+
+
                                         <TableCell>
                                             {payment.status === 'Pending' && (
                                                 <>

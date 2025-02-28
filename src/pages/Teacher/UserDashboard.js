@@ -1,10 +1,9 @@
-
 import React, { useState, useContext, useEffect } from 'react';
-import UserSidebar from '../../components/Studentsidebar';
+import UserSidebar from '../../components/UserSidebar';
 import ChangePassword from './ChangePassword';
 import Userbrd from './Userbrd';
 import { ThemeContext } from '../../context/ThemeContext';
-import { IconButton, Modal, TextField, Button, Box, Typography, Snackbar, Alert, Grid, Paper ,Badge} from '@mui/material';
+import { IconButton, Modal, TextField, Button, Box, Typography, Snackbar, Alert, Grid, Paper, Badge } from '@mui/material';
 import { Brightness4, Brightness7, VpnKey as ApiKeyIcon, Close as CloseIcon, CheckCircle as CheckCircleIcon, Notifications as NotificationsIcon, Business as BusinessIcon, CardMembership as PlanIcon, Event as EventIcon } from '@mui/icons-material';
 import { toast, Toaster } from 'react-hot-toast';
 import { updateApiKey, getUserDetails, logout } from '../../services/userService'; // Import logout function
@@ -16,6 +15,7 @@ import CourseManagement from './CourseCreation';
 import CourseContentManagement from './CourseContentManagement';
 import DocumentSharingPage from './DocumentSharingPage ';
 import CommunityPage from './CommunityPage';
+import DocumentRequestPage from './DocumentRequestPage';
 
 // Custom Alert Component for Subscription Expiry
 const SubscriptionExpiredAlert = ({ open, onClose }) => {
@@ -77,6 +77,7 @@ const UserDashboard = () => {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [showAlertIcon, setShowAlertIcon] = useState(false); // State to control alert icon visibility
   const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+
   // Fetch company and subscription details
   useEffect(() => {
     const fetchCompanyAndSubscriptionDetails = async () => {
@@ -109,12 +110,14 @@ const UserDashboard = () => {
           setRemainingDays(remainingDays);
 
           // Check if subscription is expired
-         
+          if (remainingDays <= 0) {
+            setSubscriptionExpired(true);
+          }
         } else {
           setActivePlan('No active plan');
           setRemainingDays(0);
           setTotalValidityPeriod(0);
-          
+          setSubscriptionExpired(true); // No active plan means subscription is expired
         }
       } catch (error) {
         console.error('Error fetching company or subscription details:', error);
@@ -123,77 +126,6 @@ const UserDashboard = () => {
     };
 
     fetchCompanyAndSubscriptionDetails();
-  }, []);
-
-  const setAuthHeaders = () => {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-  
-    return {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'x-refresh-token': refreshToken,
-      },
-      withCredentials: true,
-    };
-  };
-  // Listen for new messages using SSE
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const userDetails = await getUserDetails();
-        const userId = userDetails.id;
-
-        // Create EventSource with credentials
-        const eventSource = new EventSource(`${apiUrl}:5000/updates?userId=${userId}`, {
-          withCredentials: true,
-      },setAuthHeaders());
-
-        // Handle incoming messages
-        eventSource.onmessage = (event) => {
-          const newMessage = JSON.parse(event.data);
-
-          // Show notification for new messages
-          if (newMessage.receiver_id === userId && newMessage.status !== 'viewed') {
-            setUnreadMessages((prev) => prev + 1); // Increment unread message count
-            setShowAlertIcon(true); // Show the alert icon
-
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-              new Notification('New Message', {
-                body: `You have a new message`,
-                icon: 'path/to/icon.png', // Optional: Add an icon
-              });
-            }
-
-            // Show in-app toast notification
-            toast.success(`Please check Community`, {
-              position: 'bottom-right',
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
-          }
-        };
-
-        // Handle errors
-        eventSource.onerror = (error) => {
-          console.error('EventSource failed:', error);
-          eventSource.close(); // Close the connection on error
-        };
-
-        // Cleanup on component unmount
-        return () => {
-          eventSource.close();
-        };
-      } catch (error) {
-        console.error('Error fetching user details:', error);
-      }
-    };
-
-    fetchUserDetails();
   }, []);
 
   // Function to calculate remaining days
@@ -264,6 +196,65 @@ const UserDashboard = () => {
     setUnreadMessages(0); // Reset unread message count
     setCurrentPage('com'); // Redirect to the Community page
   };
+
+  // Listen for new messages using SSE
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDetails = await getUserDetails();
+        const userId = userDetails.id;
+
+        // Create EventSource with credentials
+        const eventSource = new EventSource(`${apiUrl}:5000/updates?userId=${userId}`, {
+          withCredentials: true,
+        });
+
+        // Handle incoming messages
+        eventSource.onmessage = (event) => {
+          const newMessage = JSON.parse(event.data);
+
+          // Show notification for new messages
+          if (newMessage.receiver_id === userId && newMessage.status !== 'viewed') {
+            setUnreadMessages((prev) => prev + 1); // Increment unread message count
+            setShowAlertIcon(true); // Show the alert icon
+
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+              new Notification('New Message', {
+                body: `You have a new message`,
+                icon: 'path/to/icon.png', // Optional: Add an icon
+              });
+            }
+
+            // Show in-app toast notification
+            toast.success(`Please check Community`, {
+              position: 'bottom-right',
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
+          }
+        };
+
+        // Handle errors
+        eventSource.onerror = (error) => {
+          console.error('EventSource failed:', error);
+          eventSource.close(); // Close the connection on error
+        };
+
+        // Cleanup on component unmount
+        return () => {
+          eventSource.close();
+        };
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
@@ -358,7 +349,6 @@ const UserDashboard = () => {
             <Typography variant="body2" sx={{ fontSize: '12px' }}>
               © 2025 University of Sri jayewardenepura S@IT. All rights reserved.
             </Typography>
-         
           </Box>
         </Box>
 
@@ -369,8 +359,7 @@ const UserDashboard = () => {
         />
 
         {/* Content Rendering */}
-         {/* Content Rendering */}
-         {currentPage === 'dashboard' && <Userbrd />}
+        {currentPage === 'dashboard' && <Userbrd />}
         {currentPage === 'file' && <Filemgt />}
         {currentPage === 'doctrack' && <DocumentTracker />}
         {currentPage === 'courseadd' && <CourseManagement />}
@@ -378,13 +367,10 @@ const UserDashboard = () => {
         {currentPage === 'group' && <DocumentSharingPage />}
         {currentPage === 'com' && <CommunityPage />}
         {currentPage === 'ChangePassword' && <ChangePassword />}
+        {currentPage === 'docreq' && <DocumentRequestPage />}
       </div>
     </div>
   );
 };
 
 export default UserDashboard;
-       
-
-     
-  

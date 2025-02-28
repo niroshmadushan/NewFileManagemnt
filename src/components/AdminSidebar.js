@@ -20,6 +20,7 @@ import {
   Settings,
   Logout,
   WarningAmber,
+  Payment,
   Business, // Icon for "Company"
   MonetizationOn, // Icon for "Subscription"
   ListAlt, // Icon for "Plans"
@@ -113,11 +114,11 @@ useEffect(() => {
       <List sx={{ flexGrow: 1 }}>
         {[
           { text: 'Dashboard', icon: <Dashboard />, action: 'dashboard' },
-          { text: 'Company MGT', icon: <Business />, action: 'Company' },
+          { text: 'Organization', icon: <Business />, action: 'Company' },
           { text: 'Subscription', icon: <MonetizationOn />, action: 'Subscription' },
           { text: 'Plans', icon: <ListAlt />, action: 'Plans' },
-           { text: 'Payment', icon: <ListAlt />, action: 'payment', permissionKey: null },
-          { text: 'User MGT', icon: <People />, action: 'create' },
+           { text: 'Payment', icon: <Payment />, action: 'payment', permissionKey: null },
+          { text: 'User Management', icon: <People />, action: 'create' },
           { text: 'Settings', icon: <AdminPanelSettings />, action: 'settings' },
         ].map((item, index) => (
           <ListItem

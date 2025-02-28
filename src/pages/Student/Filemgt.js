@@ -21,11 +21,13 @@ import { Folder, Add, InsertDriveFile, Close, Edit, PictureAsPdf, Article, Folde
 import { selectData, insertData, updateData } from '../../services/dataService';
 import { toast } from 'react-hot-toast';
 import { uploadFile, downloadFile } from '../../services/fileservice';
+import API_URL from '../../api';
 import { getUserDetails } from '../../services/userService'; // Assuming you have a function to get user details
-const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+
 const FileExplorer = () => {
   const theme = useTheme();
   const [mainFolders, setMainFolders] = useState([]);
+  const apiUrl = API_URL; // ✅ Correct
   const [subFolders, setSubFolders] = useState([]);
   const [selectedMainFolder, setSelectedMainFolder] = useState(null);
   const [selectedSubFolder, setSelectedSubFolder] = useState(null);
@@ -245,7 +247,7 @@ const FileExplorer = () => {
     }}>
       <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2, color: theme.palette.text.primary }}>
         <Folder sx={{ fontSize: 32, color: 'primary.main' }} />
-        File Explorer
+        File Mangement
       </Typography>
 
       <Grid container spacing={2} sx={{ flex: 1, overflow: 'hidden' }}>

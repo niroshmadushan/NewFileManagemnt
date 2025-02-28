@@ -2,7 +2,9 @@ import axios from 'axios';
 import { logout } from './userService'; // Assuming you have a logout function in userService
 import { initializeWebSocket } from './ws'; // Import WebSocket initialization function
 
-const BASE_URL = 'http://localhost:3000/api';
+import API_URL from "../api"; // Import the API URL
+
+const BASE_URL = API_URL+':3000/api';
 
 // Create an Axios instance
 const axiosInstance = axios.create({

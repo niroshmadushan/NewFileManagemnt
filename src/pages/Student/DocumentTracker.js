@@ -23,7 +23,7 @@ import { toast } from 'react-hot-toast';
 import { uploadFile } from '../../services/fileservice';
 import { getUserDetails } from '../../services/userService';
 import { Editor } from '@tinymce/tinymce-react'; // Import TinyMCE editor
-
+import API_URL from '../../api';
 const DocumentTracker = () => {
   const theme = useTheme();
   const [documentTrackers, setDocumentTrackers] = useState([]);
@@ -43,7 +43,7 @@ const DocumentTracker = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [users, setUsers] = useState([]);
-  const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+  const apiUrl = API_URL; // ✅ Correct
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +199,7 @@ const DocumentTracker = () => {
     }}>
       <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2, color: theme.palette.text.primary }}>
         <Folder sx={{ fontSize: 32, color: 'primary.main' }} />
-        Document Tracker
+        Document Flow
       </Typography>
 
       <Grid container spacing={2} sx={{ flex: 1, overflow: 'hidden' }}>

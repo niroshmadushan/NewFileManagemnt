@@ -34,7 +34,6 @@ import { QRCodeSVG } from 'qrcode.react'; // For generating QR code
 import jsPDF from 'jspdf'; // For generating PDF with QR code
 import QRCode from 'qrcode';
 import API_URL from '../../api';
-
 const DocumentRequestPage = () => {
     const theme = useTheme();
     const [documentRequests, setDocumentRequests] = useState([]);
@@ -46,7 +45,7 @@ const DocumentRequestPage = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [companyId, setCompanyId] = useState(null);
-    const apiUrl = API_URL; // ✅ Correct
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -66,7 +65,7 @@ const DocumentRequestPage = () => {
             setCompanyId(userDetails.company_id);
 
             // Fetch document requests
-            const requestsResponse = await selectData('document_requests', { company_id: userDetails.company_id,user_id:userDetails.id });
+            const requestsResponse = await selectData('document_requests', { company_id: userDetails.company_id });
             setDocumentRequests(requestsResponse.data || []);
 
             toast.success('Data fetched successfully!');
@@ -87,7 +86,7 @@ const DocumentRequestPage = () => {
         try {
             const userDetails = await getUserDetails();
             const requestData = {
-                user_id: userDetails.id,
+                user_id: userDetails.user_id,
                 full_name: userDetails.full_name,
                 email: userDetails.email,
                 doc_name: docName,
@@ -165,7 +164,7 @@ const DocumentRequestPage = () => {
         }
 
         const fileName = getFileNameFromLink(docRequest.doc_link);
-        const fileUrl = `${apiUrl}:3000/uploads/${fileName}`;
+        const fileUrl = API_URL+`:3000/uploads/${fileName}`;
         console.log(`Fetching file from: ${fileUrl}`);
 
         try {
@@ -177,7 +176,7 @@ const DocumentRequestPage = () => {
             const pdfDoc = await PDFDocument.load(response.data);
 
             // Generate the QR code as a PNG data URL
-            const qrCodeUrl = `${apiUrl}:3000/api/data/validate/docreq?id=${docRequest.id}`;
+            const qrCodeUrl = API_URL+`:3000/api/data/validate/docreq?id=${docRequest.id}`;
             const qrCodeDataUrl = await generateQRCodeDataURL(qrCodeUrl);
             const qrImageBytes = await fetch(qrCodeDataUrl).then(res => res.arrayBuffer());
             const qrImage = await pdfDoc.embedPng(qrImageBytes);
@@ -271,16 +270,7 @@ const DocumentRequestPage = () => {
                         <Description sx={{ fontSize: 20, mr: 1, color: 'primary.main' }} />
                         Document Requests
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -5 }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<Description />}
-                            onClick={() => setShowRequestForm(true)}
-                            sx={{ backgroundColor: theme.palette.mode === 'dark' ? 'primary.dark' : 'primary.main', color: 'white' }}
-                        >
-                            Request Document
-                        </Button>
-                    </Box>
+                   
                     <TableContainer sx={{
                         maxHeight: 500, p: 1, mt: 1,
                         '&::-webkit-scrollbar': { width: '6px' },
@@ -297,18 +287,21 @@ const DocumentRequestPage = () => {
                                     <TableCell>Email</TableCell>
                                     <TableCell>Doc Name</TableCell>
                                     <TableCell>Doc Description</TableCell>
-                                    <TableCell>Doc Status</TableCell>
+                                    <TableCell>Company ID</TableCell>
+                                    <TableCell>Doc Link</TableCell>
+                                    <TableCell>Upload Document</TableCell>
                                     <TableCell>Download Document</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {documentRequests.map((request, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{request.id}</TableCell>
+                                        <TableCell>{request.user_id}</TableCell>
                                         <TableCell>{request.full_name}</TableCell>
                                         <TableCell>{request.email}</TableCell>
                                         <TableCell>{request.doc_name}</TableCell>
                                         <TableCell>{request.doc_description}</TableCell>
+                                        <TableCell>{request.company_id}</TableCell>
                                         <TableCell>
                                             {request.doc_link ? (
                                                 <Typography variant="body2" color="primary">
@@ -318,6 +311,18 @@ const DocumentRequestPage = () => {
                                                 <Typography variant="body2" color="error">
                                                     Not Uploaded
                                                 </Typography>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {!request.doc_link && (
+                                                <Button
+                                                    variant="outlined"
+                                                    startIcon={<CloudUpload />}
+                                                    onClick={() => setSelectedRequest(request)}
+                                                    sx={{ color: theme.palette.mode === 'dark' ? 'primary.light' : 'primary.main' }}
+                                                >
+                                                    Upload
+                                                </Button>
                                             )}
                                         </TableCell>
                                         <TableCell>

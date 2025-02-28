@@ -43,10 +43,10 @@ const AdminSidebar = ({ onNavigate }) => {
         // Define navigation items and their corresponding permission keys
         const navItems = [
           { text: 'Dashboard', icon: <DashboardIcon />, action: 'dashboard', permissionKey: null },
-          { text: 'File MGT', icon: <FolderIcon />, action: 'file', permissionKey: null },
-          { text: 'Doc Track', icon: <DescriptionIcon />, action: 'doctrack', permissionKey: null },
-          { text: 'Course Attend', icon: <FolderSharedIcon />, action: 'courseattend', permissionKey: null },
-          { text: 'Course Content', icon: <SchoolIcon />, action: 'coursecnt', permissionKey: null },
+          { text: 'File Management', icon: <FolderIcon />, action: 'file', permissionKey: null },
+          { text: 'Document flow', icon: <DescriptionIcon />, action: 'doctrack', permissionKey: null },
+          { text: 'Find Courses', icon: <FolderSharedIcon />, action: 'courseattend', permissionKey: null },
+          { text: 'My Courses', icon: <SchoolIcon />, action: 'coursecnt', permissionKey: null },
           { text: 'Doc Group', icon: <FolderSharedIcon />, action: 'group', permissionKey: null },
           { text: 'Doc Request', icon: <FolderSharedIcon />, action: 'docreq', permissionKey: null },
           { text: 'Community', icon: <GroupsIcon />, action: 'com', permissionKey: null },

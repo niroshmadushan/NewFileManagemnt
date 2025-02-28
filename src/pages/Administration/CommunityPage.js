@@ -130,7 +130,7 @@ const CommunityPage = () => {
     useEffect(() => {
         if (!currentUser.id) return;
 
-        const eventSource = new EventSource(`${apiUrl}:5000/updates?userId=${currentUser.id}`, {
+        const eventSource = new EventSource(`http://192.168.86.142:5000/updates?userId=${currentUser.id}`, {
             withCredentials: true,
         }, setAuthHeaders());
 

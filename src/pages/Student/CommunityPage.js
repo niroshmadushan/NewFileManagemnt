@@ -35,7 +35,7 @@ const CommunityPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messageBoxRef = useRef(null);
-
+    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
     // Fetch all users and current user details
     useEffect(() => {
         const fetchData = async () => {
@@ -43,7 +43,7 @@ const CommunityPage = () => {
                 const userDetails = await getUserDetails();
                 setCurrentUser(userDetails);
 
-                const usersResponse = await selectDataProfiles();
+                const usersResponse = await selectDataProfiles({ company_id: userDetails.company_id });
                 const allUsers = [...usersResponse.data];
                 setUsers(allUsers);
             } catch (error) {
@@ -83,8 +83,8 @@ const CommunityPage = () => {
                         ...user,
                         latestMessage: userMessages[user.id]
                             ? userMessages[user.id].reduce((latest, message) => {
-                                  return message.sent_at > latest.sent_at ? message : latest;
-                              })
+                                return message.sent_at > latest.sent_at ? message : latest;
+                            })
                             : null,
                     }))
                     .sort((a, b) => {
@@ -113,13 +113,26 @@ const CommunityPage = () => {
         fetchMessages();
     }, [currentUser, users]);
 
+    const setAuthHeaders = () => {
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        return {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'x-refresh-token': refreshToken,
+            },
+            withCredentials: true,
+        };
+    };
+
     // Listen for real-time updates using SSE
     useEffect(() => {
         if (!currentUser.id) return;
 
-        const eventSource = new EventSource(`http://192.168.12.50:5000/updates?userId=${currentUser.id}`, {
+        const eventSource = new EventSource(`http://192.168.86.142:5000/updates?userId=${currentUser.id}`, {
             withCredentials: true,
-        });
+        }, setAuthHeaders());
 
         eventSource.onmessage = (event) => {
             const newMessage = JSON.parse(event.data);
@@ -159,12 +172,12 @@ const CommunityPage = () => {
     // Filter messages for the selected user
     const filteredMessages = selectedUser
         ? messages
-              .filter(
-                  (message) =>
-                      (message.sender_id === currentUser.id && message.receiver_id === selectedUser.id) ||
-                      (message.sender_id === selectedUser.id && message.receiver_id === currentUser.id)
-              )
-              .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
+            .filter(
+                (message) =>
+                    (message.sender_id === currentUser.id && message.receiver_id === selectedUser.id) ||
+                    (message.sender_id === selectedUser.id && message.receiver_id === currentUser.id)
+            )
+            .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
         : [];
 
     // Handle sending a new message
@@ -295,13 +308,19 @@ const CommunityPage = () => {
                                 button
                                 onClick={() => setSelectedUser(user)}
                                 sx={{
-
-                                    cursor:'pointer',
+                                    display: user.id === currentUser.id ? 'none' : 'flex', // Hide the current user
+                                    cursor: 'pointer',
                                     mb: 1,
                                     borderRadius: '12px',
-                                    backgroundColor: selectedUser?.id === user.id ? theme.palette.action.selected : 'transparent',
+                                    backgroundColor:
+                                        selectedUser?.id === user.id
+                                            ? theme.palette.action.selected
+                                            : 'transparent',
                                     '&:hover': {
-                                        backgroundColor: user.id === currentUser.id ? 'transparent' : theme.palette.action.hover,
+                                        backgroundColor:
+                                            user.id === currentUser.id
+                                                ? 'transparent'
+                                                : theme.palette.action.hover,
                                     },
                                     opacity: user.id === currentUser.id ? 0.7 : 1,
                                     pointerEvents: user.id === currentUser.id ? 'none' : 'auto',

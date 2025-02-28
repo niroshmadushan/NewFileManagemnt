@@ -22,6 +22,7 @@ import {
   Forum,
   AccountCircle,
   ExpandLess,
+  School as SchoolIcon, // For Course CNT
   ExpandMore,
   Logout,
   WarningAmber,
@@ -45,9 +46,9 @@ const AdminSidebar = ({ onNavigate }) => {
 
         const navItems = [
           { text: 'Dashboard', icon: <Dashboard />, action: 'dashboard', permissionKey: null },
-          { text: 'Employee Management', icon: <People />, action: 'usermgt', permissionKey: null },
+          { text: 'User Management', icon: <People />, action: 'usermgt', permissionKey: null },
           { text: 'Organization Info', icon: <Business />, action: 'cominfo', permissionKey: null },
-          { text: 'Course MGT', icon: <Business />, action: 'courseadd', permissionKey: null },
+          { text: 'Courses', icon: <SchoolIcon />, action: 'courseadd', permissionKey: null },
           { text: 'Payment', icon: <Payment />, action: 'payment', permissionKey: null },
           { text: 'Community', icon: <Forum />, action: 'com', permissionKey: null },
           { text: 'User Info', icon: <AccountCircle />, action: 'ChangePassword', permissionKey: null },

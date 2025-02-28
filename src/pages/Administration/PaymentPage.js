@@ -34,9 +34,9 @@ import { getUserDetails } from '../../services/userService';
 import { uploadFile, downloadFile, } from '../../services/fileservice'; // Import file service functions
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
+import API_URL from '../../api';
 const PaymentPage = () => {
-    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+    const apiUrl = API_URL; // ✅ Correct
     const theme = useTheme();
     const [companyDetails, setCompanyDetails] = useState(null);
     const [subscriptionPlans, setSubscriptionPlans] = useState([]);
@@ -192,13 +192,13 @@ const PaymentPage = () => {
         doc.text(`Company ID: ${payment.company_id}`, 15, 45);
 
         doc.setFont('helvetica', 'bold');
-        doc.text('Connex Codeworks', 145, 30);
+        doc.text('SyncUP Company', 145, 30);
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         doc.text('No 286, R. A. De Mel Mawatha,', 145, 35);
         doc.text('Colombo 00300, Sri Lanka', 145, 40);
-        doc.text('Email: info@connexcodeworks.biz', 145, 45);
+        doc.text('Email: info@SyncUP.biz', 145, 45);
         doc.text(`Date: ${new Date(payment.created_at).toLocaleDateString()}`, 145, 50);
 
         doc.setDrawColor(0);
@@ -235,7 +235,7 @@ const PaymentPage = () => {
         doc.setFontSize(8);
         doc.text('- Please ensure timely payment to avoid service disruptions.', 20, doc.autoTable.previous.finalY + 15);
         doc.text('- Use the reference number when making payments.', 20, doc.autoTable.previous.finalY + 20);
-        doc.text('- Contact support at info@connexcodeworks.biz for any payment issues.', 20, doc.autoTable.previous.finalY + 25);
+        doc.text('- Contact support at info@syncup.biz for any payment issues.', 20, doc.autoTable.previous.finalY + 25);
 
         const pageHeight = doc.internal.pageSize.height;
         doc.setDrawColor(0, 0, 0);
@@ -248,7 +248,7 @@ const PaymentPage = () => {
 
         doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
-        doc.text('Authorized by Connex Codeworks', 15, pageHeight - 12);
+        doc.text('Authorized by SyncUp', 15, pageHeight - 12);
 
         doc.save(`BillOfPayment_${payment.reference}.pdf`);
     };
@@ -384,7 +384,7 @@ const PaymentPage = () => {
                                 borderRadius: '3px'
                             }
                         }}>
-                            <Table stickyHeader>
+                               <Table stickyHeader>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Company ID</TableCell>
@@ -490,6 +490,8 @@ const PaymentPage = () => {
                             <TextField
                                 fullWidth
                                 label="Company Name"
+
+                                sx={{mt:1}}
                                 value={companyDetails?.company_name || ''}
                                 disabled
                                 InputProps={{
@@ -504,6 +506,7 @@ const PaymentPage = () => {
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
+                                sx={{mt:1}}
                                 label="Company ID"
                                 value={companyDetails?.id || ''}
                                 disabled

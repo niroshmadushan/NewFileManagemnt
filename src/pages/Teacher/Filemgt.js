@@ -245,7 +245,7 @@ const FileExplorer = () => {
     }}>
       <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 2, color: theme.palette.text.primary }}>
         <Folder sx={{ fontSize: 32, color: 'primary.main' }} />
-        File Explorer
+        File Management
       </Typography>
 
       <Grid container spacing={2} sx={{ flex: 1, overflow: 'hidden' }}>
