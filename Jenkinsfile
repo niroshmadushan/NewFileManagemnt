@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/niroshmadushan/NewFileManagemnt.git'
+                git branch: 'main', credentialsId: 'niroshtest', url: 'https://github.com/niroshmadushan/NewFileManagemnt.git'
             }
         }
 
@@ -20,7 +20,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                withDockerRegistry([credentialsId: 'docker_hub', url: '']) {
                     sh "docker push ${DOCKER_IMAGE}"
                 }
             }
