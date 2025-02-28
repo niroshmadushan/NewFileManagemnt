@@ -494,7 +494,7 @@ const AdminUserManagement = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Phone sx={{ mr: 1, color: 'action.active' }} />
             <TextField
-              label="Phone Number"
+              label="Phone No"
               fullWidth
               margin="normal"
               value={newUser.phone_number}
