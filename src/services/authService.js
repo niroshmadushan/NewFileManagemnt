@@ -3,7 +3,9 @@ import { logout, getUserDetails } from './userService';
 
 import API_URL from "../api"; // Import the API URL
 
-const BASE_URL = API_URL+':3000/api';
+const BASE_URL = API_URL+'/fmscdb';
+const BASE_URL2 = API_URL;
+
 
 // Helper function to get and set the new tokens in headers
 const setAuthHeaders = () => {
@@ -64,7 +66,7 @@ export const login = async (email, password) => {
 export const validateToken = async () => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/data/validate`,
+      `${BASE_URL2}/validate`,
       {},
       setAuthHeaders() // Use the helper function to set headers
     );

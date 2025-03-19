@@ -14,28 +14,33 @@ import {
     useTheme,
     Badge,
     InputAdornment,
-    Slide,
+    Dialog,
+    Divider,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
-import { Send, EmojiEmotions, Search, People } from '@mui/icons-material';
-import { selectData, insertData, selectDataProfiles, updateData } from '../../services/dataService';
+import { Email, Search, People, Refresh, Add } from '@mui/icons-material';
+import { selectData, selectDataProfiles, insertData, updateData } from '../../services/dataService';
 import { getUserDetails } from '../../services/userService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Picker from 'emoji-picker-react'; // Emoji picker library
+import { Editor } from '@tinymce/tinymce-react'; // TinyMCE Editor
 
 const CommunityPage = () => {
     const theme = useTheme();
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
     const [currentUser, setCurrentUser] = useState({});
     const [sortedUsers, setSortedUsers] = useState([]);
     const [unreadMessages, setUnreadMessages] = useState({});
     const [searchQuery, setSearchQuery] = useState('');
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [openNewMessageDialog, setOpenNewMessageDialog] = useState(false);
+    const [newMessageSubject, setNewMessageSubject] = useState('');
+    const [newMessageBody, setNewMessageBody] = useState('');
     const messageBoxRef = useRef(null);
-    const apiUrl = process.env.REACT_APP_MAIN_API; // ✅ Correct
+
     // Fetch all users and current user details
     useEffect(() => {
         const fetchData = async () => {
@@ -48,6 +53,7 @@ const CommunityPage = () => {
                 setUsers(allUsers);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                toast.error('Failed to fetch users.', { position: 'top-right' });
             }
         };
 
@@ -55,64 +61,66 @@ const CommunityPage = () => {
     }, []);
 
     // Fetch all messages for the current user (both sent and received)
-    useEffect(() => {
+    const fetchMessages = async () => {
         if (!currentUser.id) return;
 
-        const fetchMessages = async () => {
-            try {
-                const sentMessages = await selectData('community', { sender_id: currentUser.id });
-                const receivedMessages = await selectData('community', { receiver_id: currentUser.id });
+        try {
+            const sentMessages = await selectData('community', { sender_id: currentUser.id });
+            const receivedMessages = await selectData('community', { receiver_id: currentUser.id });
 
-                const allMessages = [...sentMessages.data, ...receivedMessages.data];
-                const uniqueMessages = Array.from(new Set(allMessages.map((message) => message.id)))
-                    .map((id) => allMessages.find((message) => message.id === id));
+            const allMessages = [...sentMessages.data, ...receivedMessages.data];
+            const uniqueMessages = Array.from(new Set(allMessages.map((message) => message.id)))
+                .map((id) => allMessages.find((message) => message.id === id));
 
-                setMessages(uniqueMessages);
+            setMessages(uniqueMessages);
 
-                const userMessages = {};
-                uniqueMessages.forEach((message) => {
-                    const otherUserId = message.sender_id === currentUser.id ? message.receiver_id : message.sender_id;
-                    if (!userMessages[otherUserId]) {
-                        userMessages[otherUserId] = [];
-                    }
-                    userMessages[otherUserId].push(message);
+            const userMessages = {};
+            uniqueMessages.forEach((message) => {
+                const otherUserId = message.sender_id === currentUser.id ? message.receiver_id : message.sender_id;
+                if (!userMessages[otherUserId]) {
+                    userMessages[otherUserId] = [];
+                }
+                userMessages[otherUserId].push(message);
+            });
+
+            const sortedUsers = users
+                .map((user) => ({
+                    ...user,
+                    latestMessage: userMessages[user.id]
+                        ? userMessages[user.id].reduce((latest, message) => {
+                              return message.sent_at > latest.sent_at ? message : latest;
+                          })
+                        : null,
+                }))
+                .sort((a, b) => {
+                    if (!a.latestMessage && !b.latestMessage) return 0;
+                    if (!a.latestMessage) return 1;
+                    if (!b.latestMessage) return -1;
+                    return new Date(b.latestMessage.sent_at) - new Date(a.latestMessage.sent_at);
                 });
 
-                const sortedUsers = users
-                    .map((user) => ({
-                        ...user,
-                        latestMessage: userMessages[user.id]
-                            ? userMessages[user.id].reduce((latest, message) => {
-                                return message.sent_at > latest.sent_at ? message : latest;
-                            })
-                            : null,
-                    }))
-                    .sort((a, b) => {
-                        if (!a.latestMessage && !b.latestMessage) return 0;
-                        if (!a.latestMessage) return 1;
-                        if (!b.latestMessage) return -1;
-                        return new Date(b.latestMessage.sent_at) - new Date(a.latestMessage.sent_at);
-                    });
+            setSortedUsers(sortedUsers);
 
-                setSortedUsers(sortedUsers);
+            const unread = {};
+            sortedUsers.forEach((user) => {
+                if (userMessages[user.id]) {
+                    unread[user.id] = userMessages[user.id].filter(
+                        (message) => message.status !== 'viewed' && message.receiver_id === currentUser.id
+                    ).length;
+                }
+            });
+            setUnreadMessages(unread);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            toast.error('Failed to fetch messages.', { position: 'top-right' });
+        }
+    };
 
-                const unread = {};
-                sortedUsers.forEach((user) => {
-                    if (userMessages[user.id]) {
-                        unread[user.id] = userMessages[user.id].filter(
-                            (message) => message.status !== 'viewed' && message.receiver_id === currentUser.id
-                        ).length;
-                    }
-                });
-                setUnreadMessages(unread);
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            }
-        };
-
+    useEffect(() => {
         fetchMessages();
     }, [currentUser, users]);
 
+    // Set up headers for SSE
     const setAuthHeaders = () => {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
@@ -130,9 +138,10 @@ const CommunityPage = () => {
     useEffect(() => {
         if (!currentUser.id) return;
 
-        const eventSource = new EventSource(`http://192.168.86.142:5000/updates?userId=${currentUser.id}`, {
-            withCredentials: true,
-        }, setAuthHeaders());
+        const eventSource = new EventSource(
+            `http://127.0.0.1:5000/updates?userId=${currentUser.id}`,
+            setAuthHeaders()
+        );
 
         eventSource.onmessage = (event) => {
             const newMessage = JSON.parse(event.data);
@@ -140,23 +149,57 @@ const CommunityPage = () => {
             setMessages((prevMessages) => {
                 const isDuplicate = prevMessages.some((message) => message.id === newMessage.id);
                 if (!isDuplicate) {
-                    return [...prevMessages, newMessage];
+                    const updatedMessages = [...prevMessages, newMessage];
+                    
+                    // Update sorted users and unread messages
+                    const userMessages = {};
+                    updatedMessages.forEach((message) => {
+                        const otherUserId = message.sender_id === currentUser.id ? message.receiver_id : message.sender_id;
+                        if (!userMessages[otherUserId]) {
+                            userMessages[otherUserId] = [];
+                        }
+                        userMessages[otherUserId].push(message);
+                    });
+
+                    const sortedUsers = users
+                        .map((user) => ({
+                            ...user,
+                            latestMessage: userMessages[user.id]
+                                ? userMessages[user.id].reduce((latest, message) => {
+                                      return message.sent_at > latest.sent_at ? message : latest;
+                                  })
+                                : null,
+                        }))
+                        .sort((a, b) => {
+                            if (!a.latestMessage && !b.latestMessage) return 0;
+                            if (!a.latestMessage) return 1;
+                            if (!b.latestMessage) return -1;
+                            return new Date(b.latestMessage.sent_at) - new Date(a.latestMessage.sent_at);
+                        });
+
+                    setSortedUsers(sortedUsers);
+
+                    const unread = {};
+                    sortedUsers.forEach((user) => {
+                        if (userMessages[user.id]) {
+                            unread[user.id] = userMessages[user.id].filter(
+                                (message) => message.status !== 'viewed' && message.receiver_id === currentUser.id
+                            ).length;
+                        }
+                    });
+                    setUnreadMessages(unread);
+
+                    // Show toast notification for new message
+                    if (newMessage.receiver_id === currentUser.id && newMessage.status !== 'viewed') {
+                        toast.info(`New message from ${newMessage.sender_name}: ${newMessage.subject}`, {
+                            position: 'top-right',
+                        });
+                    }
+
+                    return updatedMessages;
                 }
                 return prevMessages;
             });
-
-            if (newMessage.receiver_id === currentUser.id && newMessage.status !== 'viewed') {
-                setUnreadMessages((prevUnread) => ({
-                    ...prevUnread,
-                    [newMessage.sender_id]: (prevUnread[newMessage.sender_id] || 0) + 1,
-                }));
-
-                if (Notification.permission === 'granted') {
-                    new Notification(`New message from ${newMessage.sender_name}`, {
-                        body: newMessage.message,
-                    });
-                }
-            }
         };
 
         eventSource.onerror = (error) => {
@@ -167,35 +210,44 @@ const CommunityPage = () => {
         return () => {
             eventSource.close();
         };
-    }, [currentUser.id]);
+    }, [currentUser.id, users]);
 
     // Filter messages for the selected user
     const filteredMessages = selectedUser
         ? messages
-            .filter(
-                (message) =>
-                    (message.sender_id === currentUser.id && message.receiver_id === selectedUser.id) ||
-                    (message.sender_id === selectedUser.id && message.receiver_id === currentUser.id)
-            )
-            .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
+              .filter(
+                  (message) =>
+                      (message.sender_id === currentUser.id && message.receiver_id === selectedUser.id) ||
+                      (message.sender_id === selectedUser.id && message.receiver_id === currentUser.id)
+              )
+              .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
         : [];
 
     // Handle sending a new message
     const handleSendMessage = async () => {
-        if (!newMessage.trim() || !selectedUser) return;
+        if (!newMessageSubject.trim() || !newMessageBody.trim() || !selectedUser) {
+            toast.error('Please fill in both subject and body.', { position: 'top-right' });
+            return;
+        }
 
         try {
             const messageData = {
                 sender_id: currentUser.id,
                 receiver_id: selectedUser.id,
-                message: newMessage,
+                subject: newMessageSubject,
+                message: newMessageBody, // TinyMCE content
                 status: 'not_viewed',
             };
 
             await insertData('community', messageData);
-            setNewMessage('');
+            setNewMessageSubject('');
+            setNewMessageBody('');
+            setOpenNewMessageDialog(false);
+            toast.success('Message sent successfully!', { position: 'top-right' });
+            fetchMessages(); // Refresh messages after sending to ensure consistency
         } catch (error) {
             console.error('Error sending message:', error);
+            toast.error('Failed to send message.', { position: 'top-right' });
         }
     };
 
@@ -228,19 +280,29 @@ const CommunityPage = () => {
         }
     }, [filteredMessages]);
 
-    // Handle emoji selection
-    const handleEmojiClick = (emojiObject) => {
-        setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
-        setShowEmojiPicker(false);
-    };
-
     // Filter users based on search query
     const filteredUsers = sortedUsers.filter((user) =>
         user.full_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Check if a message is new (e.g., received within the last 5 minutes)
+    const isNewMessage = (sentAt) => {
+        const now = new Date();
+        const messageTime = new Date(sentAt);
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes in milliseconds
+        return messageTime > fiveMinutesAgo && sentAt; // Ensure sentAt is valid
+    };
+
     return (
-        <Box sx={{ display: 'flex', height: '85vh', backgroundColor: theme.palette.mode === 'dark' ? '#1F1F1F' : '#FFFFFF', p: 2, borderRadius: 4 }}>
+        <Box
+            sx={{
+                display: 'flex',
+                height: '85vh',
+                backgroundColor: theme.palette.mode === 'dark' ? '#1F1F1F' : '#FFFFFF',
+                p: 2,
+                borderRadius: 4,
+            }}
+        >
             {/* Left Section: Members List */}
             <Box
                 sx={{
@@ -341,7 +403,7 @@ const CommunityPage = () => {
                                     primary={user.full_name}
                                     secondary={
                                         user.latestMessage
-                                            ? user.latestMessage.message
+                                            ? user.latestMessage.subject
                                             : 'No messages yet'
                                     }
                                     primaryTypographyProps={{ fontWeight: 'medium' }}
@@ -355,19 +417,50 @@ const CommunityPage = () => {
 
             {/* Right Section: Message Box */}
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                {/* Header with Selected User Avatar */}
+                {/* Header with Selected User Avatar and Buttons */}
                 {selectedUser && (
-                    <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                            {selectedUser.full_name.charAt(0).toUpperCase()}
-                        </Avatar>
-                        <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                {selectedUser.full_name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {selectedUser.email}
-                            </Typography>
+                    <Box
+                        sx={{
+                            p: 2,
+                            borderBottom: `1px solid ${theme.palette.divider}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            height: '64px', // Approximate header height
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                                {selectedUser.full_name.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <Box>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    {selectedUser.full_name}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {selectedUser.email}
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<Add />}
+                                onClick={() => setOpenNewMessageDialog(true)}
+                                sx={{ borderRadius: '20px' }}
+                            >
+                                New Message
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                startIcon={<Refresh />}
+                                onClick={fetchMessages}
+                                sx={{ borderRadius: '20px' }}
+                            >
+                                Reload
+                            </Button>
                         </Box>
                     </Box>
                 )}
@@ -377,10 +470,15 @@ const CommunityPage = () => {
                     ref={messageBoxRef}
                     sx={{
                         flex: 1,
+                        minHeight: 0, // Allow flex to shrink to zero if needed
+                        maxHeight: 'calc(85vh - 64px)', // Subtract header height from viewport height
                         overflowY: 'auto',
                         overflowX: 'hidden',
                         p: 2,
-                        backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#F5F5F5',
+                      
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2, // Consistent spacing between messages
                         '&::-webkit-scrollbar': {
                             width: '8px',
                         },
@@ -398,45 +496,82 @@ const CommunityPage = () => {
                     }}
                 >
                     {selectedUser ? (
-                        filteredMessages.map((message) => (
-                            <Slide
-                                key={message.id}
-                                direction={message.sender_id === currentUser.id ? 'left' : 'right'}
-                                in={true}
-                                mountOnEnter
-                                unmountOnExit
-                            >
-                                <Box
+                        filteredMessages.length > 0 ? (
+                            filteredMessages.map((message) => (
+                                <Badge
+                                    key={message.id}
+                                    color="success"
+                                    variant="dot"
+                                    invisible={
+                                        !isNewMessage(message.sent_at) ||
+                                        message.status === 'viewed' ||
+                                        message.sender_id === currentUser.id
+                                    }
                                     sx={{
-                                        display: 'flex',
-                                        justifyContent: message.sender_id === currentUser.id ? 'flex-end' : 'flex-start',
-                                        mb: 2,
+                                        position: 'relative',
+                                        '& .MuiBadge-dot': {
+                                            width: 10,
+                                            height: 10,
+                                            backgroundColor: '#4CAF50', // Green flag
+                                            borderRadius: '50%',
+                                            boxShadow: 'none', // Slight shadow for visibility
+                                            position: 'absolute',
+                                            top: 8,
+                                            right: 8,
+                                        },
                                     }}
                                 >
                                     <Paper
                                         sx={{
                                             p: 2,
-                                            maxWidth: '70%',
                                             backgroundColor:
                                                 message.sender_id === currentUser.id
-                                                    ? theme.palette.mode === 'dark' ? '#005C4B' : '#25D366'
-                                                    : theme.palette.mode === 'dark' ? '#2D2D2D' : '#ECE5DD',
-                                            color:
-                                                message.sender_id === currentUser.id
-                                                    ? theme.palette.common.white
-                                                    : theme.palette.text.primary,
+                                                    ? theme.palette.mode === 'dark'
+                                                        ? '#005C4B'
+                                                        : '#E1FEC9'
+                                                    : theme.palette.mode === 'dark'
+                                                    ? '#2D2D2D'
+                                                    : '#FFFFFF',
                                             borderRadius: '12px',
                                             boxShadow: 'none',
+                                            border:'0.5px solid rgba(0, 0, 0, 0.25)',
+                                            width: '100%', // Ensure full width
+                                            position: 'relative', // Ensure Badge positions correctly
                                         }}
                                     >
-                                        <Typography variant="body1">{message.message}</Typography>
-                                        <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
-                                            {new Date(message.sent_at).toLocaleTimeString()}
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                            <Email sx={{ color: theme.palette.primary.main }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                                {message.subject}
+                                            </Typography>
+                                        </Box>
+                                        <Typography variant="caption" sx={{ display: 'block', mb: 1, color: 'text.secondary' }}>
+                                            From: {message.sender_id === currentUser.id ? 'You' : selectedUser.full_name} |{' '}
+                                            {new Date(message.sent_at).toLocaleString()}
                                         </Typography>
+                                        <Divider sx={{ mb: 1 }} />
+                                        <Box
+                                            sx={{ color: theme.palette.text.primary }}
+                                            dangerouslySetInnerHTML={{ __html: message.message }}
+                                        />
                                     </Paper>
-                                </Box>
-                            </Slide>
-                        ))
+                                </Badge>
+                            ))
+                        ) : (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: '100%',
+                                    textAlign: 'center',
+                                }}
+                            >
+                                <Typography variant="h6" color="text.secondary">
+                                    No messages found.
+                                </Typography>
+                            </Box>
+                        )
                     ) : (
                         <Box
                             sx={{
@@ -448,55 +583,65 @@ const CommunityPage = () => {
                             }}
                         >
                             <Typography variant="h6" color="text.secondary">
-                                Please select a member to start chatting.
+                                Please select a member to view messages.
                             </Typography>
                         </Box>
                     )}
                 </Box>
-
-                {/* Input Area with Emoji Picker */}
-                {selectedUser && (
-                    <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
-                        <Box sx={{ position: 'relative' }}>
-                            {showEmojiPicker && (
-                                <Box sx={{ position: 'absolute', bottom: '60px', right: '0', zIndex: 1 }}>
-                                    <Picker onEmojiClick={handleEmojiClick} />
-                                </Box>
-                            )}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <TextField
-                                    fullWidth
-                                    placeholder="Type a message..."
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    sx={{ flex: 1 }}
-                                    InputProps={{
-                                        sx: {
-                                            borderRadius: '20px',
-                                            backgroundColor: theme.palette.mode === 'dark' ? '#2D2D2D' : '#F1F1F1',
-                                        },
-                                    }}
-                                />
-                                <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-                                    <EmojiEmotions />
-                                </IconButton>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSendMessage}
-                                    disabled={!newMessage.trim()}
-                                    sx={{ borderRadius: '20px' }}
-                                >
-                                    <Send />
-                                </Button>
-                            </Box>
-                        </Box>
-                    </Box>
-                )}
             </Box>
 
-            {/* Toast Container for In-App Notifications */}
+            {/* New Message Dialog */}
+            <Dialog
+                open={openNewMessageDialog}
+                onClose={() => setOpenNewMessageDialog(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Email sx={{ color: theme.palette.primary.main }} />
+                    New Message to {selectedUser?.full_name}
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        fullWidth
+                        label="Subject"
+                        value={newMessageSubject}
+                        onChange={(e) => setNewMessageSubject(e.target.value)}
+                        sx={{ mt: 2, mb: 2 }}
+                    />
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                        Body
+                    </Typography>
+                    <Editor
+                        apiKey="pu258hbqcxkxv0lgzxelam5vmcax1y7m1oir2w0ougjnc5di" // Replace with your TinyMCE API key
+                        value={newMessageBody}
+                        onEditorChange={(content) => setNewMessageBody(content)}
+                        init={{
+                            height: 400,
+                            menubar: true,
+                            plugins: [
+                                'advlist autolink lists link image charmap print preview anchor',
+                                'searchreplace visualblocks code fullscreen',
+                                'insertdatetime media table paste code help wordcount',
+                            ],
+                            toolbar:
+                                'undo redo | formatselect | bold italic underline | \
+                                alignleft aligncenter alignright alignjustify | \
+                                bullist numlist outdent indent | link image | removeformat | code',
+                            content_style:
+                                'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenNewMessageDialog(false)}>Cancel</Button>
+                    <Button onClick={handleSendMessage} variant="contained" color="primary">
+                        Send
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Toast Container for Notifications */}
             <ToastContainer />
         </Box>
     );

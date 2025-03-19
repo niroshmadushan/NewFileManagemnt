@@ -206,7 +206,7 @@ const UserDashboard = () => {
         const userId = userDetails.id;
 
         // Create EventSource with credentials
-        const eventSource = new EventSource(`${apiUrl}:5000/updates?userId=${userId}`, {
+        const eventSource = new EventSource(`http://127.0.0.1:5000/updates?userId=${userId}`, {
           withCredentials: true,
         });
 

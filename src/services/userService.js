@@ -1,11 +1,17 @@
 import axios from 'axios';
 import API_URL from "../api"; // Import the API URL
 
-const BASE_URL = API_URL+':3000/api';
+const BASE_URL = API_URL+'/fmscdb';
+const BASE_URL2 = API_URL;
 
 // Create an Axios instance
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true, // Ensure cookies are sent with requests
+});
+
+const axiosInstance2 = axios.create({
+  baseURL: BASE_URL2,
   withCredentials: true, // Ensure cookies are sent with requests
 });
 
@@ -56,7 +62,7 @@ export const logout = async () => {
 export const getUserDetails = async () => {
   try {
     // Validate token and get user ID
-    const validateResponse = await axiosInstance.post('/data/validate', {}, setAuthHeaders());
+    const validateResponse = await axiosInstance2.post('/validate', {}, setAuthHeaders());
     const userId = validateResponse.data.user.id;
 
     // Fetch user profile details using user ID

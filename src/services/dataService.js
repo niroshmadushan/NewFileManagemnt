@@ -4,8 +4,8 @@ import { initializeWebSocket } from './ws'; // Import WebSocket initialization f
 
 import API_URL from "../api"; // Import the API URL
 
-const BASE_URL = API_URL+':3000/api';
-const BASE_URL2 = 'http://10.33.81.93:3000/api';
+const BASE_URL = API_URL+'/fmscdb';
+
 
 // Create an Axios instance
 const axiosInstance = axios.create({
